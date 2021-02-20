@@ -1,0 +1,7 @@
+mne
+PyQt5
+scipy
+pandas
+pyprep
+autoreject
+ipyfilechooser

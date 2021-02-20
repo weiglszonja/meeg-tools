@@ -4,4 +4,7 @@ scipy
 pandas
 autoreject
 jupyter
+joblib
+sklearn
+matplotlib
 ipyfilechooser

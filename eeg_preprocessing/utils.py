@@ -3,7 +3,7 @@ from scipy import io
 import pandas as pd
 
 
-def create_montage_from_mat_layout(mat_file_path):
+def create_montage_from_mat_layout(mat_file_path: str):
     layout = io.loadmat(mat_file_path, squeeze_me=True)
 
     # create montage from channel positions
@@ -22,8 +22,8 @@ def create_montage_from_mat_layout(mat_file_path):
 
     # write montage to txt file
     layout_filename = Path(mat_file_path).stem
-    montage.to_csv(f'{layout_filename}.txt', sep=' ', index=False, header=True)
-
-
-if __name__ == '__main__':
-    create_montage_from_mat_layout('acticap-64ch-standard2.mat')
+    layout_file_path = f'{layout_filename}.txt'
+    if not Path(layout_file_path).is_file():
+        montage.to_csv(layout_file_path, sep=' ', index=False, header=True)
+    else:
+        print(f'Montage already exists: {layout_file_path}')

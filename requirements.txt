@@ -2,6 +2,6 @@ mne
 PyQt5
 scipy
 pandas
-pyprep
 autoreject
+jupyter
 ipyfilechooser

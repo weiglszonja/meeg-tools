@@ -18,7 +18,7 @@ def concat_raws_from_events(events: pd.DataFrame, raw: mne.io.Raw) -> mne.io.Raw
     return mne.concatenate_raws(raws)
 
 
-def run_ica(raw: mne.io.Raw) -> mne.Epochs:
+def run_ica(raw: mne.io.Raw) -> mne.preprocessing.ica:
     sfreq = raw.info['sfreq']
     # remove slow drifts and high freq noise
     raw_bandpass_ica = raw.load_data().copy().filter(l_freq=0.5, h_freq=45)
@@ -45,7 +45,7 @@ def run_ica(raw: mne.io.Raw) -> mne.Epochs:
 
     print('Preliminary epoch rejection: ')
     bad_epochs = faster_bad_epochs(epochs, picks=None, thres=3, use_metrics=None)
-    epochs_faster = epochs.drop(bad_epochs, reason='FASTER')
+    epochs_faster = epochs.copy().drop(bad_epochs, reason='FASTER')
 
     del epochs
 
@@ -59,15 +59,7 @@ def run_ica(raw: mne.io.Raw) -> mne.Epochs:
     epochs_faster.set_channel_types({'Fp1': 'eog', 'Fp2': 'eog'})
     eog_indices, eog_scores = ica.find_bads_eog(epochs_faster)
     ica.exclude = eog_indices
-    ica.plot_sources(epochs_faster, start=0, stop=10)
-
-    ica.apply(epochs_faster)
-
-    epochs_faster.info['ica_method'] = method
-    epochs_faster.info['ica_n_components'] = n_components
-    epochs_faster.info['ica_n_excluded'] = len(ica.exclude)
-
-    return epochs_faster
+    return ica, epochs_faster
 
 
 def run_autoreject(epochs: mne.Epochs, n_jobs: int = 11, subset: bool = False) -> mne.Epochs:
@@ -109,7 +101,9 @@ def run_ransac(epochs: mne.Epochs, n_jobs: int = 11) -> mne.Epochs:
     # find bad channels with ransac
     ransac = Ransac(verbose='progressbar', n_jobs=n_jobs)
     epochs_ransac = ransac.fit_transform(epochs)
-    epochs_ransac.info['bad_channels_ransac'] = ransac.bad_chs_
+    if ransac.bad_chs_:
+        bads_str = ', '.join(ransac.bad_chs_)
+        epochs_ransac.info.update(description=epochs_ransac.info['description'] + ' interpolated: '+bads_str)
 
     return epochs_ransac
 

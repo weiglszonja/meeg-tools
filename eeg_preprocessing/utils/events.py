@@ -11,14 +11,14 @@ def get_events_from_raw(raw: mne.io.Raw) -> pd.DataFrame:
     # Read annotations from raw
     events_from_annot, _ = mne.events_from_annotations(raw)
 
-    event_dict = {83: f'rs_{num_day}',
+    event_dict = {83: f'rs_{num_day}_1',
                   91: f'asrt_{num_day}_1',
                   93: f'asrt_{num_day}_2',
                   95: f'asrt_{num_day}_3',
                   97: f'asrt_{num_day}_4',
                   99: f'asrt_{num_day}_5',
                   101: f'asrt_{num_day}_6',
-                  87: f'rs_{int(num_day) + 1}'}
+                  87: f'rs_{num_day}_2'}
 
     events_df = pd.DataFrame(data=events_from_annot, columns=['start_time', 'ignore', 'event_id']).drop(
         columns=['ignore'])
@@ -44,7 +44,8 @@ def get_events_from_raw(raw: mne.io.Raw) -> pd.DataFrame:
             # only seq A
             block_events['end_time'] = events_df[events_df['event_id'] == 52]['start_time'].values
             block_events['sequence'] = 'A'
-        except IndexError:
+        except Exception as e:
+            print(e)
             # only seq B
             block_events['end_time'] = events_df[events_df['event_id'] == 152]['start_time'].values
             block_events['sequence'] = 'B'

@@ -74,6 +74,8 @@ def run_ica(epochs: mne.Epochs) -> mne.preprocessing.ica:
 
     ica.plot_sources(epochs, start=0, stop=10)
 
+    epochs.set_channel_types({'Fp1': 'eeg', 'Fp2': 'eeg'})
+
     return ica
 
 

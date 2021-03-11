@@ -1,6 +1,7 @@
 from pathlib import Path
 import mne
 import pandas as pd
+import numpy as np
 from pandas.core.common import SettingWithCopyWarning
 import warnings
 
@@ -111,7 +112,7 @@ def concat_raws_from_events(events: pd.DataFrame, raw: mne.io.Raw) -> mne.io.Raw
     offset_in_seconds = 5
     raws = []
     for idx, event in events.iterrows():
-        if 'real_start_time' in event:
+        if not np.isnan(event['real_start_time']):
             raws.append(raw.copy().crop(tmin=event['real_start_time'] + offset_in_seconds,
                                         tmax=event['end_time'],
                                         include_tmax=True))

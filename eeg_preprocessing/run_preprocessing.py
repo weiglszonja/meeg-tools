@@ -80,7 +80,18 @@ def run_ica(epochs: mne.Epochs) -> mne.preprocessing.ica:
 
 
 def run_autoreject(epochs: mne.Epochs, n_jobs: int = 11, subset: bool = False) -> mne.Epochs:
-    # run autoreject on epochs
+    """
+    Drop bad epochs based on AutoReject.
+    Parameters
+    ----------
+    epochs: the instance to be cleaned
+    n_jobs: the number of parallel processes to be run
+    subset: whether to train autoreject on a random subset of data (faster) default is False.
+
+    Returns
+    -------
+    Epochs instance
+    """
     ar = autoreject.AutoReject(random_state=42, n_jobs=n_jobs)
 
     if subset:
@@ -94,22 +105,8 @@ def run_autoreject(epochs: mne.Epochs, n_jobs: int = 11, subset: bool = False) -
         ar.fit(epochs)
 
     reject_log = ar.get_reject_log(epochs)
-    # epochs[reject_log.bad_epochs].plot(n_epochs=10, title='ALL BAD EPOCHS AUTOREJECT')
-
-    reject_df = pd.DataFrame(data=reject_log.labels, columns=epochs.info['ch_names'])
-    # 0 : good data segment
-    # 1 : bad data segment not interpolated
-    # 2 : bad data segment interpolated
-    reject_df = reject_df.replace(1, 0)
-    reject_df = reject_df.replace(2, 1)
-    reject_df = reject_df.replace(np.nan, 0)
-
-    # mark channels where more than 50% of epochs were marked as bad channels
-    bad_channels = reject_df.astype(bool).sum(axis=0) > len(epochs) / 2
-    bads = bad_channels.index[bad_channels].tolist()
-
     epochs.drop(reject_log.bad_epochs, reason='AUTOREJECT')
-    epochs.info['bad_channels_autoreject'] = bads
+    epochs.info['reject_log'] = reject_log
 
     return epochs
 

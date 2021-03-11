@@ -8,48 +8,73 @@ import pandas as pd
 from random import sample
 
 
-def run_ica(raw: mne.io.Raw) -> mne.preprocessing.ica:
-    sfreq = raw.info['sfreq']
+def create_epochs_for_ica(raw: mne.io.Raw) -> mne.Epochs:
+    """
+    Creates fixed length continuous epochs for ICA.
+    Drops epochs that were marked bad based on outlier detection.
+    Parameters
+    ----------
+    raw: the instance to be used for creating the epochs
+
+    Returns
+    -------
+    Epochs instance
+    """
     # remove slow drifts and high freq noise
-    raw_bandpass_ica = raw.load_data().copy().filter(l_freq=0.5, h_freq=45)
+    raw_bandpass = raw.load_data().copy().filter(l_freq=0.5, h_freq=45)
 
     # create fixed length epoch for preprocessing
     epoch_duration_in_seconds = 1.0
-
-    events = mne.make_fixed_length_events(raw_bandpass_ica,
+    events = mne.make_fixed_length_events(raw_bandpass,
                                           id=1,
                                           first_samp=True,
                                           duration=epoch_duration_in_seconds)
 
-    epochs = mne.Epochs(raw=raw_bandpass_ica,
+    epochs = mne.Epochs(raw=raw_bandpass,
                         events=events,
                         picks='eeg',
                         event_id=1,
                         baseline=None,
                         tmin=0.,
-                        tmax=epoch_duration_in_seconds - (1 / sfreq),
+                        tmax=epoch_duration_in_seconds - (1 / raw.info['sfreq']),
                         preload=True)
 
     # remove from memory
-    del raw_bandpass_ica
+    del raw_bandpass
 
     print('Preliminary epoch rejection: ')
     bad_epochs = faster_bad_epochs(epochs, picks=None, thres=3, use_metrics=None)
     epochs_faster = epochs.copy().drop(bad_epochs, reason='FASTER')
 
-    del epochs
+    return epochs_faster
 
-    # run ica
-    n_components = 32
-    method = 'infomax'
 
-    ica = mne.preprocessing.ICA(n_components=n_components, random_state=42, method=method)
-    ica.fit(epochs_faster, decim=2)
+def run_ica(epochs: mne.Epochs) -> mne.preprocessing.ica:
+    """
+    Runs ICA decomposition on Epochs instance.
 
-    epochs_faster.set_channel_types({'Fp1': 'eog', 'Fp2': 'eog'})
-    eog_indices, eog_scores = ica.find_bads_eog(epochs_faster)
+    If there are no EOG channels found, it uses 'Fp1' and 'Fp2' channels to identify
+    and mark EOG components.
+    Parameters
+    ----------
+    epochs: the instance to be used for ICA decomposition
+
+    Returns
+    -------
+    ICA instance
+    """
+    ica = mne.preprocessing.ICA(n_components=32, random_state=42, method='infomax')
+    ica.fit(epochs, decim=2)
+
+    if 'eog' not in epochs.get_channel_types():
+        epochs.set_channel_types({'Fp1': 'eog', 'Fp2': 'eog'})
+
+    eog_indices, eog_scores = ica.find_bads_eog(epochs)
     ica.exclude = eog_indices
-    return ica, epochs_faster
+
+    ica.plot_sources(epochs, start=0, stop=10)
+
+    return ica
 
 
 def run_autoreject(epochs: mne.Epochs, n_jobs: int = 11, subset: bool = False) -> mne.Epochs:
@@ -58,7 +83,7 @@ def run_autoreject(epochs: mne.Epochs, n_jobs: int = 11, subset: bool = False) -
 
     if subset:
         n_epochs = len(epochs)
-        print('Fitting autoreject on random subset of epochs: ')
+        print(f'Fitting autoreject on random (n={n_epochs} subset of epochs: ')
         subset = sample(set(np.arange(0, n_epochs, 1)), int(n_epochs * 0.25))
         ar.fit(epochs[subset])
 

@@ -8,16 +8,6 @@ import pandas as pd
 from random import sample
 
 
-def concat_raws_from_events(events: pd.DataFrame, raw: mne.io.Raw) -> mne.io.Raw:
-    raws = []
-    for idx, event in events.iterrows():
-        if 'real_start_time' in event:
-            raws.append(raw.copy().crop(tmin=event['real_start_time'] + 5, tmax=event['end_time'], include_tmax=True))
-        else:
-            raws.append(raw.copy().crop(tmin=event['start_time'], tmax=event['end_time'], include_tmax=True))
-    return mne.concatenate_raws(raws)
-
-
 def run_ica(raw: mne.io.Raw) -> mne.preprocessing.ica:
     sfreq = raw.info['sfreq']
     # remove slow drifts and high freq noise
@@ -103,7 +93,8 @@ def run_ransac(epochs: mne.Epochs, n_jobs: int = 11) -> mne.Epochs:
     epochs_ransac = ransac.fit_transform(epochs)
     if ransac.bad_chs_:
         bads_str = ', '.join(ransac.bad_chs_)
-        epochs_ransac.info.update(description=epochs_ransac.info['description'] + ' interpolated: '+bads_str)
+        epochs_ransac.info.update(
+            description=epochs_ransac.info['description'] + ' interpolated: ' + bads_str)
 
     return epochs_ransac
 
@@ -139,13 +130,3 @@ def run_ransac(epochs: mne.Epochs, n_jobs: int = 11) -> mne.Epochs:
 #     epochs_ica = run_ica(raw=raw_rs)
 #
 #
-
-
-
-
-
-
-
-
-
-

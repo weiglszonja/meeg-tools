@@ -91,3 +91,31 @@ def get_events_from_raw(raw: mne.io.Raw) -> pd.DataFrame:
     block_events = block_events.append(resting_events)
 
     return block_events
+
+
+def concat_raws_from_events(events: pd.DataFrame, raw: mne.io.Raw) -> mne.io.Raw:
+    """
+    Concatenate raw instances based on events.
+
+    If 'real_start_time' is present in the events, it will be used as starting point, otherwise
+    'start_time' is used. The 5 seconds offset was selected based on visual inspection.
+    Parameters
+    ----------
+    events: the events to use for finding the start and end times
+    raw: the instance to be cut and concatenated
+
+    Returns
+    -------
+    Raw instance
+    """
+    offset_in_seconds = 5
+    raws = []
+    for idx, event in events.iterrows():
+        if 'real_start_time' in event:
+            raws.append(raw.copy().crop(tmin=event['real_start_time'] + offset_in_seconds,
+                                        tmax=event['end_time'],
+                                        include_tmax=True))
+        else:
+            raws.append(raw.copy().crop(tmin=event['start_time'], tmax=event['end_time'],
+                                        include_tmax=True))
+    return mne.concatenate_raws(raws)

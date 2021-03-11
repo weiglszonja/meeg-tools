@@ -1,10 +1,8 @@
-import os
 import mne
 from autoreject import autoreject, Ransac
 
 from .utils.faster import faster_bad_epochs
 import numpy as np
-import pandas as pd
 from random import sample
 
 

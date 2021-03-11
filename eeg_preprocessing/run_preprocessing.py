@@ -112,7 +112,18 @@ def run_autoreject(epochs: mne.Epochs, n_jobs: int = 11, subset: bool = False) -
 
 
 def run_ransac(epochs: mne.Epochs, n_jobs: int = 11) -> mne.Epochs:
-    # find bad channels with ransac
+    """
+    Find and interpolate bad channels with Ransac.
+    If there are no bad channels found returns the Epochs instance unmodified.
+    Parameters
+    ----------
+    epochs: the instance where bad channels to be found
+    n_jobs: the number of parallel processes to run
+
+    Returns
+    -------
+    Epochs instance
+    """
     ransac = Ransac(verbose='progressbar', n_jobs=n_jobs)
     epochs_ransac = ransac.fit_transform(epochs)
     if ransac.bad_chs_:
@@ -121,36 +132,3 @@ def run_ransac(epochs: mne.Epochs, n_jobs: int = 11) -> mne.Epochs:
             description=epochs_ransac.info['description'] + ' interpolated: ' + bads_str)
 
     return epochs_ransac
-
-#
-# if __name__ == '__main__':
-#     # Set base path to EEG data
-#     base_path = 'G:/TMS_rewiring/'
-#     eeg_path = os.path.join(base_path, 'Raw_data/24_L/Day1/EEG/')
-#     # Create folder for preprocessed and interim files
-#     folder_name = 'preprocessed'
-#     interim_path = os.path.join(base_path, folder_name)
-#
-#     raw_file_name = [file for file in os.listdir(eeg_path) if file.endswith('.vhdr')][0]
-#     subject, condition, day = raw_file_name.split('_')
-#     num_day = [d for d in day if d.isdigit()][0]
-#
-#     # read raw file (not loaded into memory)
-#     raw = mne.io.read_raw_brainvision(os.path.join(eeg_path, raw_file_name), preload=False, verbose=True)
-#
-#     resting_events, block_events = get_events_from_raw(raw)
-#
-#     # Create path to interim epoch files
-#     interim_epochs_path = os.path.join(interim_path, condition, 'epochs_rs')
-#     if not os.path.exists(interim_epochs_path):
-#         os.makedirs(interim_epochs_path)
-#
-#     # Create path to interim raw files
-#     interim_raw_path = os.path.join(interim_path, condition, 'raw_rs')
-#     if not os.path.exists(interim_raw_path):
-#         os.makedirs(interim_raw_path)
-#
-#     raw_rs = concat_raws_from_events(resting_events)
-#     epochs_ica = run_ica(raw=raw_rs)
-#
-#

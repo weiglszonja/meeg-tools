@@ -1,0 +1,20 @@
+name: eeg_preprocessing
+channels:
+- defaults
+- anaconda
+- conda-forge
+dependencies:
+- python=3.7
+- ipython
+- pip
+- mne
+- PyQt5
+- scipy
+- pandas
+- autoreject
+- jupyter
+- joblib
+- sklearn
+- matplotlib
+- ipyfilechooser
+- pywin32

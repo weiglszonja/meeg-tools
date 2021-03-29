@@ -1,6 +1,7 @@
 from pathlib import Path
 import mne
 import pandas as pd
+import numpy as np
 from pandas.core.common import SettingWithCopyWarning
 import warnings
 
@@ -63,12 +64,13 @@ def get_events_from_raw(raw: mne.io.Raw) -> pd.DataFrame:
             return events
 
         # take the last practice stimuli time as block start time
+        offset_in_seconds = 5
         real_block_start_time = \
             block[block['event_id'].isin([19, 119])]['start_time'].values.tolist()[-1]
-        block_start_times.append(real_block_start_time)
+        block_start_times.append(real_block_start_time + offset_in_seconds)
 
     block_events = events.loc[block_start_indices]
-    block_events['real_start_time'] = block_start_times
+    block_events['start_time'] = block_start_times
 
     if num_day != '3':
         block_events['sequence'] = events.loc[block_end_indices]['event_id'].map(
@@ -90,4 +92,57 @@ def get_events_from_raw(raw: mne.io.Raw) -> pd.DataFrame:
     # Append resting events to block events
     block_events = block_events.append(resting_events)
 
+    # Add duration of events
+    block_events['duration'] = block_events['end_time'] - block_events['start_time']
+
     return block_events
+
+
+def create_epochs_from_events(raw: mne.io.Raw, events: pd.DataFrame):
+    """
+    Creates fixed length continuous epochs for ICA based on events.
+
+
+    Parameters
+    ----------
+    raw: the instance to be used for creating the epochs
+    events: the events to be used for creating the
+
+    Returns
+    -------
+    Epochs instance
+    """
+    epoch_duration_in_seconds = 1.0
+
+    # preallocate array to store all events
+    events_array = np.array([np.empty(3)], dtype=int)
+
+    for idx, event in events.sort_values('start_time').reset_index().iterrows():
+        raw_segment = raw.copy().crop(tmin=event['start_time'],
+                                      tmax=event['end_time'],
+                                      include_tmax=True)
+
+        epoch_events = mne.make_fixed_length_events(raw_segment,
+                                                    id=event['event_id'],
+                                                    first_samp=True,
+                                                    duration=epoch_duration_in_seconds)
+
+        events_array = np.append(events_array, epoch_events, axis=0)
+
+    # remove pre-allocated row
+    events_array = np.delete(events_array, [0], axis=0)
+
+    # remove slow drifts and high freq noise
+    raw_bandpass = raw.load_data().copy().filter(l_freq=0.5, h_freq=45)
+
+    epochs = mne.Epochs(raw=raw_bandpass,
+                        events=events_array,
+                        picks='eeg',
+                        event_id=dict(zip(events['event'], events['event_id'])),
+                        baseline=None,
+                        tmin=0.,
+                        tmax=epoch_duration_in_seconds - (1 / raw.info['sfreq']),
+                        reject_by_annotation=True,
+                        preload=True)
+
+    return epochs

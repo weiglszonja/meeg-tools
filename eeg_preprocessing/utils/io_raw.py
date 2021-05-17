@@ -1,12 +1,11 @@
 from pathlib import Path
 
-from mne.io import read_raw_brainvision
+from mne.io import read_raw_brainvision, read_raw_edf
 
 
 def read_raw(raw_file_path: str, add_info: bool = True):
     """
     Read raw EEG file from the given path.
-    Currently only Brain Vision files (.vhdr) are supported, for more formats contact the developer.
     Parameters
     ----------
     raw_file_path: the full path to the EEG file
@@ -18,13 +17,16 @@ def read_raw(raw_file_path: str, add_info: bool = True):
     """
     raw_file_path = Path(raw_file_path)
     suffix = raw_file_path.suffix
-    if not suffix == '.vhdr':
-        print(f'The selected file format ({suffix}) is not the expected Brain Vision format (.vhdr)'
-              ', please select another file.')
-        return
 
     # Load raw file from path
-    raw = read_raw_brainvision(raw_file_path, preload=False, verbose=True)
+    if suffix == '.vhdr':
+        raw = read_raw_brainvision(raw_file_path, preload=False, verbose=True)
+    elif suffix == '.edf':
+        raw = read_raw_edf(raw_file_path, preload=False, verbose=True)
+    else:
+        print(f'The selected file format ({suffix}) is not the expected Brain Vision format (.vhdr)'
+              f' or standard EDF (.edf) format, please select another file.')
+        return
 
     # Session parameters
     if add_info:

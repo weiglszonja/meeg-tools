@@ -4,7 +4,7 @@ import pandas as pd
 import numpy as np
 from pandas.core.common import SettingWithCopyWarning
 import warnings
-from utils.config import config
+from .config import settings
 
 warnings.simplefilter(action="ignore", category=SettingWithCopyWarning)
 
@@ -113,7 +113,7 @@ def create_epochs_from_events(raw: mne.io.Raw, events: pd.DataFrame):
     -------
     Epochs instance
     """
-    epoch_duration_in_seconds = config['epochs']['duration']
+    epoch_duration_in_seconds = settings['epochs']['duration']
 
     # preallocate array to store all events
     events_array = np.array([np.empty(3)], dtype=int)
@@ -134,8 +134,8 @@ def create_epochs_from_events(raw: mne.io.Raw, events: pd.DataFrame):
     events_array = np.delete(events_array, [0], axis=0)
 
     # remove slow drifts and high freq noise
-    raw_bandpass = raw.load_data().copy().filter(l_freq=config['bandpass_filter']['low_freq'],
-                                                 h_freq=config['bandpass_filter']['high_freq'])
+    raw_bandpass = raw.load_data().copy().filter(l_freq=settings['bandpass_filter']['low_freq'],
+                                                 h_freq=settings['bandpass_filter']['high_freq'])
 
     epochs = mne.Epochs(raw=raw_bandpass,
                         events=events_array,

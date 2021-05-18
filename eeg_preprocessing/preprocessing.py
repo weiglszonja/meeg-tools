@@ -5,7 +5,7 @@ from .utils.faster import faster_bad_epochs
 import numpy as np
 from random import sample
 
-from .utils.config import config
+from .utils.config import settings
 
 
 def prepare_epochs_for_ica(epochs: mne.Epochs) -> mne.Epochs:
@@ -40,10 +40,10 @@ def run_ica(epochs: mne.Epochs) -> mne.preprocessing.ica:
     -------
     ICA instance
     """
-    ica = mne.preprocessing.ICA(n_components=config['ica']['n_components'],
+    ica = mne.preprocessing.ICA(n_components=settings['ica']['n_components'],
                                 random_state=42,
-                                method=config['ica']['method'])
-    ica.fit(epochs, decim=config['ica']['decim'])
+                                method=settings['ica']['method'])
+    ica.fit(epochs, decim=settings['ica']['decim'])
 
     if 'eog' not in epochs.get_channel_types():
         epochs.set_channel_types({'Fp1': 'eog', 'Fp2': 'eog'})

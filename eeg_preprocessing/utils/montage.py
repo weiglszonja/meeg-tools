@@ -1,8 +1,6 @@
 from pathlib import Path
 from mne.io import Raw
 from mne.channels import read_custom_montage
-from scipy import io
-import pandas as pd
 
 
 def set_raw_montage_from_locs(raw: Raw, montage_file_path: str, show_montage: False = bool):

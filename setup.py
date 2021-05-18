@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from setuptools import setup
+from setuptools import setup, find_packages
 
 
 with open('README.md', 'r') as f:
@@ -12,14 +12,15 @@ with open('requirements.txt') as f:
 
 setup_args = dict(
     name='eeg-preprocessing',
-    version='0.1.2',
+    version='0.2.3',
     description='Semiautomatic framework for preprocessing EEG data',
     long_description=long_description,
     long_description_content_type='text/markdown',
     author='Szonja Weigl',
     author_email='weigl.anna.szonja@gmail.com',
     url='https://github.com/weiglszonja/eeg-preprocessing',
-    packages=['eeg_preprocessing'],
+    packages=find_packages(),
+    include_package_data=True,
     install_requires=install_requires,
 )
 

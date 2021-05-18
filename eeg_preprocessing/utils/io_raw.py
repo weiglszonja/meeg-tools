@@ -3,7 +3,7 @@ from pathlib import Path
 from mne.io import read_raw_brainvision, read_raw_edf, Raw
 from mne import Epochs, make_fixed_length_events
 
-from utils.config import config
+from .config import settings
 
 
 def read_raw(raw_file_path: str, add_info: bool = True):
@@ -49,10 +49,10 @@ def read_raw(raw_file_path: str, add_info: bool = True):
 
 def create_epochs_from_raw(raw: Raw) -> Epochs:
     # remove slow drifts and high freq noise
-    raw_bandpass = raw.load_data().copy().filter(l_freq=config['bandpass_filter']['low_freq'],
-                                                 h_freq=config['bandpass_filter']['high_freq'])
+    raw_bandpass = raw.load_data().copy().filter(l_freq=settings['bandpass_filter']['low_freq'],
+                                                 h_freq=settings['bandpass_filter']['high_freq'])
 
-    epoch_duration_in_seconds = config['epochs']['duration']
+    epoch_duration_in_seconds = settings['epochs']['duration']
 
     events = make_fixed_length_events(raw_bandpass,
                                       id=1,

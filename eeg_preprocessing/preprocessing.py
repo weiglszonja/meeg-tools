@@ -5,6 +5,8 @@ from .utils.faster import faster_bad_epochs
 import numpy as np
 from random import sample
 
+from .utils.config import config
+
 
 def prepare_epochs_for_ica(epochs: mne.Epochs) -> mne.Epochs:
     """
@@ -34,13 +36,14 @@ def run_ica(epochs: mne.Epochs) -> mne.preprocessing.ica:
     Parameters
     ----------
     epochs: the instance to be used for ICA decomposition
-
     Returns
     -------
     ICA instance
     """
-    ica = mne.preprocessing.ICA(n_components=32, random_state=42, method='infomax')
-    ica.fit(epochs, decim=2)
+    ica = mne.preprocessing.ICA(n_components=config['ica']['n_components'],
+                                random_state=42,
+                                method=config['ica']['method'])
+    ica.fit(epochs, decim=config['ica']['decim'])
 
     if 'eog' not in epochs.get_channel_types():
         epochs.set_channel_types({'Fp1': 'eog', 'Fp2': 'eog'})

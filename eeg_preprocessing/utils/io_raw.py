@@ -1,12 +1,14 @@
 from pathlib import Path
 
-from mne.io import read_raw_brainvision
+from mne.io import read_raw_brainvision, read_raw_edf, Raw
+from mne import Epochs, make_fixed_length_events
+
+from utils.config import config
 
 
 def read_raw(raw_file_path: str, add_info: bool = True):
     """
     Read raw EEG file from the given path.
-    Currently only Brain Vision files (.vhdr) are supported, for more formats contact the developer.
     Parameters
     ----------
     raw_file_path: the full path to the EEG file
@@ -18,25 +20,55 @@ def read_raw(raw_file_path: str, add_info: bool = True):
     """
     raw_file_path = Path(raw_file_path)
     suffix = raw_file_path.suffix
-    if not suffix == '.vhdr':
-        print(f'The selected file format ({suffix}) is not the expected Brain Vision format (.vhdr)'
-              ', please select another file.')
-        return
 
     # Load raw file from path
-    raw = read_raw_brainvision(raw_file_path, preload=False, verbose=True)
+    if suffix == '.vhdr':
+        raw = read_raw_brainvision(raw_file_path, preload=False, verbose=True)
+    elif suffix == '.edf':
+        raw = read_raw_edf(raw_file_path, preload=False, verbose=True)
+    else:
+        print(f'The selected file format ({suffix}) is not the expected Brain Vision format (.vhdr)'
+              f' or standard EDF (.edf) format, please select another file.')
+        return
 
     # Session parameters
+    raw_id = raw_file_path.stem
+    raw.info.update(fid=raw_id)
     if add_info:
-        raw_id = raw_file_path.stem
         id_split = raw_id.split('_')
         subject = id_split[0]
         condition = id_split[1]
         num_day = [x for x in id_split[-1] if x.isdigit()][0]
 
-        raw.info.update(fid=raw_id,
-                        subject=subject,
+        raw.info.update(subject=subject,
                         condition=condition,
                         num_day=num_day)
 
     return raw
+
+
+def create_epochs_from_raw(raw: Raw) -> Epochs:
+    # remove slow drifts and high freq noise
+    raw_bandpass = raw.load_data().copy().filter(l_freq=config['bandpass_filter']['low_freq'],
+                                                 h_freq=config['bandpass_filter']['high_freq'])
+
+    epoch_duration_in_seconds = config['epochs']['duration']
+
+    events = make_fixed_length_events(raw_bandpass,
+                                      id=1,
+                                      first_samp=True,
+                                      duration=epoch_duration_in_seconds)
+
+    epochs = Epochs(raw=raw_bandpass,
+                    events=events,
+                    picks='eeg',
+                    event_id=1,
+                    baseline=None,
+                    tmin=0.,
+                    tmax=epoch_duration_in_seconds - (1 / raw.info['sfreq']),
+                    preload=True)
+
+    # remove from memory
+    del raw_bandpass
+
+    return epochs

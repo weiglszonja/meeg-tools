@@ -12,7 +12,7 @@ with open('requirements.txt') as f:
 
 setup_args = dict(
     name='eeg-preprocessing',
-    version='0.1.0',
+    version='0.1.1',
     description='Semiautomatic framework for preprocessing EEG data',
     long_description=long_description,
     long_description_content_type='text/markdown',

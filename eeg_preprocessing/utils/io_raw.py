@@ -1,6 +1,7 @@
 from pathlib import Path
 
-from mne.io import read_raw_brainvision, read_raw_edf
+from mne.io import read_raw_brainvision, read_raw_edf, Raw
+from mne import Epochs, make_fixed_length_events
 
 
 def read_raw(raw_file_path: str, add_info: bool = True):
@@ -29,16 +30,36 @@ def read_raw(raw_file_path: str, add_info: bool = True):
         return
 
     # Session parameters
+    raw_id = raw_file_path.stem
+    raw.info.update(fid=raw_id)
     if add_info:
-        raw_id = raw_file_path.stem
         id_split = raw_id.split('_')
         subject = id_split[0]
         condition = id_split[1]
         num_day = [x for x in id_split[-1] if x.isdigit()][0]
 
-        raw.info.update(fid=raw_id,
-                        subject=subject,
+        raw.info.update(subject=subject,
                         condition=condition,
                         num_day=num_day)
 
     return raw
+
+
+def create_epochs_from_raw(raw: Raw) -> Epochs:
+    epoch_duration_in_seconds = 1.0
+
+    events = make_fixed_length_events(raw,
+                                      id=1,
+                                      first_samp=True,
+                                      duration=epoch_duration_in_seconds)
+
+    epochs = Epochs(raw=raw,
+                    events=events,
+                    picks='eeg',
+                    event_id=1,
+                    baseline=None,
+                    tmin=0.,
+                    tmax=epoch_duration_in_seconds - (1 / raw.info['sfreq']),
+                    preload=True)
+
+    return epochs

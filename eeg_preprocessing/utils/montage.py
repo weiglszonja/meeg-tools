@@ -5,13 +5,14 @@ from scipy import io
 import pandas as pd
 
 
-def set_raw_montage_from_locs(raw: Raw, montage_file_path: str):
+def set_raw_montage_from_locs(raw: Raw, montage_file_path: str, show_montage: False = bool):
     '''
     Reads channels locations from a file and applies them to Raw instance.
     Parameters
     ----------
     raw: the Raw instance with missing channel locations
-    locs_file_path: the full path to the channel locations file (e.g. Starstim20.locs)
+    montage_file_path: the full path to the channel locations file (e.g. Starstim20.locs)
+    show_montage: whether to show channel locations in a plot
 
     Returns
     -------
@@ -33,6 +34,8 @@ def set_raw_montage_from_locs(raw: Raw, montage_file_path: str):
 
         print('Applying channel locations to Raw instance.')
         raw.set_montage(montage)
-        raw.plot_sensors(show_names=True)
+
+        if show_montage:
+            raw.plot_sensors(show_names=True)
 
         return raw

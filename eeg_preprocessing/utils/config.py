@@ -1,3 +1,3 @@
-settings = dict(bandpass_filter=dict(low_freq=1, high_freq=30),
+settings = dict(bandpass_filter=dict(low_freq=0.5, high_freq=45),
                 epochs=dict(duration=1),
-                ica=dict(n_components=20, method='infomax', decim=None))
+                ica=dict(n_components=32, method='infomax', decim=2))

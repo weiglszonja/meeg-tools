@@ -56,8 +56,8 @@ def run_ica(epochs: Epochs) -> ICA:
     """
     Runs ICA decomposition on Epochs instance.
 
-    If there are no EOG channels found, it uses 'Fp1' and 'Fp2' channels to identify
-    and mark EOG components.
+    If there are no EOG channels found, it uses 'Fp1' and 'Fp2' channels to
+    identify and mark EOG components.
     Parameters
     ----------
     epochs: the instance to be used for ICA decomposition
@@ -89,7 +89,7 @@ def run_autoreject(epochs: Epochs, n_jobs: int = 11,
     ----------
     epochs: the instance to be cleaned
     n_jobs: the number of parallel processes to be run
-    subset: whether to train autoreject on a random subset of data (faster) default is False.
+    subset: whether to train autoreject on a random subset of data (faster)
 
     Returns
     -------
@@ -99,8 +99,8 @@ def run_autoreject(epochs: Epochs, n_jobs: int = 11,
 
     n_epochs = len(epochs)
     if subset:
-
-        print(f'Fitting autoreject on random (n={int(n_epochs * 0.25)}) subset of epochs: ')
+        print(f'Fitting autoreject on random (n={int(n_epochs * 0.25)}) '
+              f'subset of epochs: ')
         subset = sample(set(np.arange(0, n_epochs, 1)), int(n_epochs * 0.25))
         ar.fit(epochs[subset])
 
@@ -129,6 +129,7 @@ def run_ransac(epochs: Epochs, n_jobs: int = 11) -> Epochs:
     if ransac.bad_chs_:
         bads_str = ', '.join(ransac.bad_chs_)
         epochs_ransac.info.update(
-            description=epochs_ransac.info['description'] + ', interpolated: ' + bads_str)
+            description=epochs_ransac.info[
+                            'description'] + ', interpolated: ' + bads_str)
 
     return epochs_ransac

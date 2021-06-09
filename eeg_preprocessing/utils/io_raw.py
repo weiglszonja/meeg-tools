@@ -12,7 +12,7 @@ def read_raw(raw_file_path: str, add_info: bool = True):
     Parameters
     ----------
     raw_file_path: the full path to the EEG file
-    add_info: whether to add info (e.g. subject, condition, day) to the raw instance
+    add_info: to add info (e.g. subject, condition, day) to the raw instance
 
     Returns
     -------
@@ -23,12 +23,17 @@ def read_raw(raw_file_path: str, add_info: bool = True):
 
     # Load raw file from path
     if suffix == '.vhdr':
-        raw = read_raw_brainvision(raw_file_path, preload=False, verbose=True)
+        raw = read_raw_brainvision(str(raw_file_path),
+                                   preload=False,
+                                   verbose=True)
     elif suffix == '.edf':
-        raw = read_raw_edf(raw_file_path, preload=False, verbose=True)
+        raw = read_raw_edf(str(raw_file_path),
+                           preload=False,
+                           verbose=True)
     else:
-        print(f'The selected file format ({suffix}) is not the expected Brain Vision format (.vhdr)'
-              f' or standard EDF (.edf) format, please select another file.')
+        print(f'The selected file format ({suffix}) is not the expected '
+              f'Brain Vision format (.vhdr) or standard EDF (.edf) format, '
+              f'please select another file.')
         return
 
     # Session parameters
@@ -49,8 +54,10 @@ def read_raw(raw_file_path: str, add_info: bool = True):
 
 def create_epochs_from_raw(raw: Raw) -> Epochs:
     # remove slow drifts and high freq noise
-    raw_bandpass = raw.load_data().copy().filter(l_freq=settings['bandpass_filter']['low_freq'],
-                                                 h_freq=settings['bandpass_filter']['high_freq'])
+    l_freq = settings['bandpass_filter']['low_freq']
+    h_freq = settings['bandpass_filter']['high_freq']
+    raw_bandpass = raw.load_data().copy().filter(l_freq=l_freq,
+                                                 h_freq=h_freq)
 
     epoch_duration_in_seconds = settings['epochs']['duration']
 

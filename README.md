@@ -2,6 +2,30 @@
 
 A semiautomatic framework for preprocessing EEG data.
 
+# Overview
+
+The eeg-preprocessing package serves as a cookbook for preprocessing EEG signals in a semiautomatic
+and reproducible way. The general use-case of the package is to use it from a Jupyter notebook. The
+`tutorials` folder contains a sample notebook that demonstrates data operations such as loading and
+writing the data along with the transformation steps that are described in the Background section.
+
+# Installation
+
+Install the latest version from PyPI into an existing environment:
+
+```bash
+$ pip install eeg_preprocessing
+```
+
+Alternatively, clone the repository and create a new conda environment Clone the repository and
+setup a conda environment:
+
+```bash
+$ git clone https://github.com/weiglszonja/eeg-preprocessing.git
+$ conda env create -f eeg-preprocessing/make_conda_env.yml
+$ source activate eeg_preprocessing
+```
+
 # Background
 
 Electroencephalography (EEG) measures neural activity by recording electrical signals at the level
@@ -18,7 +42,7 @@ working with neurophysiological data. For automated rejection of bad data spans 
 bad electrodes it uses the Autoreject (Jas et al., 2017) and the Random Sample Consensus (RANSAC) (
 Bigdely-Shamlo et al., 2015) packages.
 
-The general use-case of the package is to use it from a Jupyter notebook. The tutorials folder
+The general use-case of the package is to use it from a Jupyter notebook. The `tutorials` folder
 contains a sample notebook that demonstrates data operations such as loading and writing the data
 along with the transformation steps that are described below.
 
@@ -29,14 +53,14 @@ cutoff frequencies can be changed in the configuration file (config.py) located 
 
 Subsequently, the filtered data is segmented into nonoverlapping segments (epochs) to facilitate
 analyses. The default duration of epochs is one seconds, however it can be changed in the
-configuration file. 
+configuration file.
 
-The removal of bad data segments is done in three steps. First, epochs are  rejected based 
-on a global threshold on the z-score (> 3) of the epoch variance and amplitude range.
-To further facilitate the signal-to-noise ratio, independent components analysis (ICA) is applied to
-the epochs. ICA is a source-separation technique that decomposes the data into a set of components
-that are unique sources of variance in the data. The number of components and the algorithm to use
-can be specified in the configuration file. The default method is the infomax algorithm that finds
+The removal of bad data segments is done in three steps. First, epochs are rejected based on a
+global threshold on the z-score (> 3) of the epoch variance and amplitude range. To further
+facilitate the signal-to-noise ratio, independent components analysis (ICA) is applied to the
+epochs. ICA is a source-separation technique that decomposes the data into a set of components that
+are unique sources of variance in the data. The number of components and the algorithm to use can be
+specified in the configuration file. The default method is the infomax algorithm that finds
 independent signals by maximizing entropy as described by (Bell & Sejnowski, 1995), (Nadal & Parga,
 1999). Components containing blink artefacts are automatically identified using mne-Python. The
 interactive visualization of ICA sources lets the user decide which components should be rejected
@@ -47,12 +71,80 @@ cleaned data. Autoreject uses unsupervised learning to estimate the rejection th
 epochs. In order to reduce computation time that increases with the number of segments and channels,
 autoreject can be fitted on a representative subset of epochs (25% of total epochs). Once the
 parameters are learned, the solution can be applied to any data that contains channels that were
-used during fit. 
+used during fit.
 
-The final step of preprocessing is to find and interpolate outlier channels. The
-Random Sample Consensus (RANSAC) algorithm (Fischler & Bolles, 1981) selects a random subsample of
-good channels to make predictions of each channel in small non-overlapping 4 seconds long time
-windows. It uses a method of spherical splines (Perrin et al., 1989) to interpolate the bad sensors.
+The final step of preprocessing is to find and interpolate outlier channels. The Random Sample
+Consensus (RANSAC) algorithm (Fischler & Bolles, 1981) selects a random subsample of good channels
+to make predictions of each channel in small non-overlapping 4 seconds long time windows. It uses a
+method of spherical splines (Perrin et al., 1989) to interpolate the bad sensors.
+
+# Usage
+
+The `tutorials` folder contains a sample jupyter notebook that demonstrates the preprocessing
+pipeline. You can follow the instructions in the notebook. Note that the custom method for loading
+raw EEG data expects BrainVision (.vhdr) and EDF (.edf) files. However, importing data from other
+formats can be done with mne-Python.
+See [this](https://mne.tools/stable/auto_tutorials/io/20_reading_eeg_data.html) documentation for
+further details. you can use the data loading utilities from mne-Python.
+
+```bash
+$ jupyter notebook tutorials/run_preprocessing_tutorial.ipynb
+```
+
+Or you can import the methods into your own project and setup the pipeline with a Python script:
+
+```python
+import argparse
+import os
+
+from preprocessing import prepare_epochs_for_ica, run_ica, run_autoreject, run_ransac
+from utils.io_raw import read_raw, create_epochs_from_raw
+
+
+def run_pipeline(source: str):
+    target_path = os.path.join(source, 'preprocessed')
+    if not os.path.exists(target_path):
+        os.makedirs(target_path)
+    files = [file for file in os.listdir(source) if file.endswith(('.edf', '.vhdr'))]
+
+    for file in files:
+        raw = read_raw(raw_file_path=os.path.join(source, file), add_info=False)
+        print(raw.info)
+
+        # create epochs from filtered continuous data
+        epochs = create_epochs_from_raw(raw=raw)
+
+        # initial rejection of bad epochs
+        epochs_faster = prepare_epochs_for_ica(epochs=epochs)
+
+        ica = run_ica(epochs=epochs_faster)
+        ica.apply(epochs_faster)
+        epochs_faster.info['description'] = f'n_components: {len(ica.exclude)}'
+
+        ar = run_autoreject(epochs_faster, n_jobs=11, subset=False)
+
+        reject_log = ar.get_reject_log(epochs_faster)
+        epochs_autoreject = epochs_faster.copy().drop(reject_log.bad_epochs, reason='AUTOREJECT')
+
+        epochs_ransac = run_ransac(epochs_autoreject)
+
+        # save clean epochs
+        fid = epochs_autoreject.info['fid']
+        epochs_clean_fname = f'{fid}_ICA_autoreject_ransac'
+        postfix = '-epo.fif.gz'
+        epochs_ransac.save(os.path.join(target_path, f'{epochs_clean_fname}{postfix}'),
+                           overwrite=False)
+
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--source", type=str, help="The directory where raw EEG files are.")
+    args = parser.parse_args()
+
+    if os.path.exists(args.source):
+        run_pipeline(source=args.source)
+
+```
 
 ## References
 
@@ -67,10 +159,10 @@ Fischler, M. A., & Bolles, R. C. (1981). Random sample consensus. In Communicati
 
 Gramfort, A., Luessi, M., Larson, E., Engemann, D. A., Strohmeier, D., Brodbeck, C., Goj, R., Jas,
 M., Brooks, T., Parkkonen, L., & Hämäläinen, M. (2013). MEG and EEG data analysis with MNE-Python.
-Frontiers in Neuroscience, 7, 267. 
+Frontiers in Neuroscience, 7, 267.
 
-Jas, M., Engemann, D. A., Bekhti, Y., Raimondo, F., & Gramfort,
-A. (2017). Autoreject: Automated artifact rejection for MEG and EEG data. NeuroImage, 159, 417–429.
+Jas, M., Engemann, D. A., Bekhti, Y., Raimondo, F., & Gramfort, A. (2017). Autoreject: Automated
+artifact rejection for MEG and EEG data. NeuroImage, 159, 417–429.
 
 Nadal, J.-P., & Parga, N. (1999). SENSORY CODING: INFORMATION MAXIMIZATION AND REDUNDANCY REDUCTION.
 In Neuronal Information Processing (pp. 164–171). https://doi.org/10.1142/9789812818041_0008
@@ -78,34 +170,3 @@ In Neuronal Information Processing (pp. 164–171). https://doi.org/10.1142/9789
 Perrin, F., Pernier, J., Bertrand, O., & Echallier, J. F. (1989). Spherical splines for scalp
 potential and current density mapping. Electroencephalography and Clinical Neurophysiology, 72(2),
 184–187.
-
-# Setup
-
-Clone the repository and setup a conda environment:
-
-```bash
-$ git clone https://github.com/weiglszonja/eeg-preprocessing.git
-$ conda env create -f eeg-preprocessing/make_conda_env.yml
-$ source activate eeg_preprocessing
-```
-
-Alternatively, install into an existing environment:
-
-```bash
-$ pip install eeg_preprocessing
-```
-
-# Usage
-
-If you cloned the repository, there is a jupyter notebook with a pipeline setup that can be used for
-preprocessing data:
-
-```bash
-$ jupyter notebook tutorials/run_preprocessing.ipynb
-```
-
-Or you can import the methods into your own project and setup the pipeline for your own needs:
-
-```python
-from eeg_preprocessing import preprocessing
-```

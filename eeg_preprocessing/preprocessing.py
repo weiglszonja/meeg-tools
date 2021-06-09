@@ -4,7 +4,7 @@ from mne.preprocessing import bads, ICA
 from autoreject import autoreject, Ransac
 from random import sample
 
-from utils.config import settings
+from .utils.config import settings
 from mne.utils import logger
 
 

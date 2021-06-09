@@ -97,8 +97,8 @@ Or you can import the methods into your own project and setup the pipeline with 
 import argparse
 import os
 
-from preprocessing import prepare_epochs_for_ica, run_ica, run_autoreject, run_ransac
-from utils.io_raw import read_raw, create_epochs_from_raw
+from eeg_preprocessing.preprocessing import prepare_epochs_for_ica, run_ica, run_autoreject, run_ransac
+from eeg_preprocessing.utils.io_raw import read_raw, create_epochs_from_raw
 
 
 def run_pipeline(source: str):

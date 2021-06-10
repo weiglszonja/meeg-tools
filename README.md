@@ -1,4 +1,6 @@
 [![Pylint](https://github.com/weiglszonja/eeg-preprocessing/actions/workflows/workflow.yml/badge.svg)](https://github.com/weiglszonja/eeg-preprocessing/actions/workflows/workflow.yml)
+[![PyPI version](https://badge.fury.io/py/eeg-preprocessing.svg)](https://badge.fury.io/py/eeg-preprocessing)
+[![GitHub license](https://img.shields.io/github/license/weiglszonja/eeg-preprocessing)](https://github.com/weiglszonja/eeg-preprocessing/blob/master/LICENSE)
 
 # eeg-preprocessing
 
@@ -169,6 +171,17 @@ if __name__ == '__main__':
         run_pipeline(source=args.source)
 
 ```
+
+## Contribution
+
+This project is under development; comments are all welcome and encouraged!
+Suggestions related to this project can be made with opening an
+[issue](https://github.com/weiglszonja/eeg-preprocessing/issues/new)
+at the issue tracker of the project. Contributions and enhancements to the code
+can be made by forking the project first; committing changes to the forked
+project and then opening a pull request from the forked branch to the master
+branch of eeg-preprocessing.
+
 
 ## References
 

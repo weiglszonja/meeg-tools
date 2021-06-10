@@ -22,9 +22,16 @@ Install the latest version from PyPI into an existing environment:
 ```bash
 $ pip install eeg_preprocessing
 ```
+Since this project is under development, I would recommend installing it
+from source in editable mode with pip:
 
-Alternatively, clone the repository and create a new conda environment Clone
-the repository and setup a conda environment:
+```bash
+$ git clone https://github.com/weiglszonja/eeg-preprocessing.git
+$ cd eeg-preprocessing
+$ pip install -e .
+```
+
+Alternatively, you can install it in a new virtual environment with conda:
 
 ```bash
 $ git clone https://github.com/weiglszonja/eeg-preprocessing.git

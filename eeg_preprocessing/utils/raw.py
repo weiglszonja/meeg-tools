@@ -14,6 +14,7 @@ def read_raw_measurement(raw_file_path: str, locs_file_path: '' = str,
     Parameters
     ----------
     raw_file_path: the full path to the EEG file
+    locs_file_path: the full path to the channel locations file (optional)
     add_info: to add info (e.g. subject, condition, day) to the raw instance
 
     Returns

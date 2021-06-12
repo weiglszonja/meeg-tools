@@ -7,8 +7,7 @@ from .config import settings
 from mne.utils import logger
 
 
-def read_raw_measurement(raw_file_path: str, locs_file_path: '' = str,
-                         add_info: bool = True):
+def read_raw_measurement(raw_file_path: str, **kwargs):
     """
     Read raw EEG file from the given path.
     Parameters
@@ -42,14 +41,15 @@ def read_raw_measurement(raw_file_path: str, locs_file_path: '' = str,
     if not bool(raw.get_montage()):
         logger.info(f'Channel locations are missing from the file')
         try:
+            path_to_locs = kwargs['locs_file_path']
             raw = set_raw_montage_from_locs(raw=raw,
-                                            path_to_locs=str(locs_file_path),
+                                            path_to_locs=path_to_locs,
                                             show_montage=False)
         except Exception as e:
             logger.error(e)
             return raw
 
-    if add_info:
+    if kwargs['add_info']:
         id_split = raw_id.split('_')
         subject = id_split[0]
         condition = id_split[1]

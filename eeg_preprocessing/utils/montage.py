@@ -3,13 +3,15 @@ from mne.io import Raw
 from mne.channels import read_custom_montage
 
 
-def set_raw_montage_from_locs(raw: Raw, montage_file_path: str, show_montage: False = bool):
+def set_raw_montage_from_locs(raw: Raw, montage_file_path: str,
+                              show_montage: False = bool):
     '''
     Reads channels locations from a file and applies them to Raw instance.
     Parameters
     ----------
     raw: the Raw instance with missing channel locations
-    montage_file_path: the full path to the channel locations file (e.g. Starstim20.locs)
+    montage_file_path: the full path to the channel locations file
+    (e.g. Starstim20.locs)
     show_montage: whether to show channel locations in a plot
 
     Returns
@@ -23,8 +25,9 @@ def set_raw_montage_from_locs(raw: Raw, montage_file_path: str, show_montage: Fa
         missing_channel_locations = [ch_name for ch_name in raw.ch_names if
                                      ch_name not in montage.ch_names]
         if missing_channel_locations:
-            print(f'There are {len(missing_channel_locations)} channel positions '
-                  f'not present in the {Path(montage_file_path).stem} file.')
+            print(f'There are {len(missing_channel_locations)} channel '
+                  f'positions not present in the '
+                  f'{Path(montage_file_path).stem} file.')
             print(f'Assuming these ({missing_channel_locations}) are not '
                   f'EEG channels, dropping them from Raw instance.')
 

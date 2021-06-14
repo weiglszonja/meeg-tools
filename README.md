@@ -102,6 +102,10 @@ selects a random subsample of good channels to make predictions of each channel
 in small non-overlapping 4 seconds long time windows. It uses a method of
 spherical splines (Perrin et al., 1989) to interpolate the bad sensors.
 
+ Additionally, the EEG reference can be changed to a “virtual reference” that 
+ is the average of all channels using mne-Python.
+
+
 # Usage
 
 The `tutorials` folder contains a sample jupyter notebook that demonstrates the
@@ -124,9 +128,9 @@ a Python script:
 import argparse
 import os
 
-from eeg_preprocessing.preprocessing import prepare_epochs_for_ica, run_ica, \
-    run_autoreject, run_ransac
-from eeg_preprocessing.utils.io_raw import read_raw, create_epochs_from_raw
+from eeg_preprocessing.preprocessing import prepare_epochs_for_ica, run_ica, run_autoreject, run_ransac
+from eeg_preprocessing.utils.raw import read_raw_measurement
+from eeg_preprocessing.utils.epochs import create_epochs
 
 
 def run_pipeline(source: str):
@@ -134,15 +138,15 @@ def run_pipeline(source: str):
     if not os.path.exists(target_path):
         os.makedirs(target_path)
     files = [file for file in os.listdir(source) if
-             file.endswith(('.edf', '.vhdr'))]
+             file.endswith(('.edf', '.vhdr', '.fif.gz'))]
 
     for file in files:
-        raw = read_raw(raw_file_path=os.path.join(source, file),
-                       add_info=False)
+        raw = read_raw_measurement(raw_file_path=os.path.join(source, file),
+                                   add_info=False)
         print(raw.info)
 
         # create epochs from filtered continuous data
-        epochs = create_epochs_from_raw(raw=raw)
+        epochs = create_epochs(raw=raw)
 
         # initial rejection of bad epochs
         epochs_faster = prepare_epochs_for_ica(epochs=epochs)
@@ -151,13 +155,14 @@ def run_pipeline(source: str):
         ica.apply(epochs_faster)
         epochs_faster.info['description'] = f'n_components: {len(ica.exclude)}'
 
-        ar = run_autoreject(epochs_faster, n_jobs=11, subset=False)
-
-        reject_log = ar.get_reject_log(epochs_faster)
+        reject_log = run_autoreject(epochs_faster, n_jobs=11, subset=False)
         epochs_autoreject = epochs_faster.copy().drop(reject_log.bad_epochs,
                                                       reason='AUTOREJECT')
 
         epochs_ransac = run_ransac(epochs_autoreject)
+        
+        # set average reference
+        epochs_ransac.set_eeg_reference('average', projection=True)
 
         # save clean epochs
         fid = epochs_autoreject.info['fid']

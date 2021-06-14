@@ -125,10 +125,10 @@ Or you can import the methods into your own project and setup the pipeline with
 a Python script:
 
 ```python
-import argparse
 import os
 
-from eeg_preprocessing.preprocessing import prepare_epochs_for_ica, run_ica, run_autoreject, run_ransac
+from eeg_preprocessing.preprocessing import prepare_epochs_for_ica, run_ica, \
+    run_autoreject, run_ransac
 from eeg_preprocessing.utils.raw import read_raw_measurement
 from eeg_preprocessing.utils.epochs import create_epochs
 
@@ -152,6 +152,9 @@ def run_pipeline(source: str):
         epochs_faster = prepare_epochs_for_ica(epochs=epochs)
 
         ica = run_ica(epochs=epochs_faster)
+        # uncomment the line below to visualize ICA sources
+        # block=True halts the execution of code until the plot is closed
+        #ica.plot_sources(epochs_faster, start=0, stop=10, block=True)
         ica.apply(epochs_faster)
         epochs_faster.info['description'] = f'n_components: {len(ica.exclude)}'
 
@@ -160,7 +163,7 @@ def run_pipeline(source: str):
                                                       reason='AUTOREJECT')
 
         epochs_ransac = run_ransac(epochs_autoreject)
-        
+
         # set average reference
         epochs_ransac.set_eeg_reference('average', projection=True)
 
@@ -174,13 +177,7 @@ def run_pipeline(source: str):
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--source", type=str,
-                        help="The directory where raw EEG files are.")
-    args = parser.parse_args()
-
-    if os.path.exists(args.source):
-        run_pipeline(source=args.source)
+    run_pipeline(source='/Volumes/crnl-memo-hd/EEG')
 
 ```
 

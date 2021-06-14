@@ -14,7 +14,6 @@ def read_raw_measurement(raw_file_path: str, **kwargs):
     ----------
     raw_file_path: the full path to the EEG file
     locs_file_path: the full path to the channel locations file (optional)
-    add_info: to add info (e.g. subject, condition, day) to the raw instance
 
     Returns
     -------
@@ -36,7 +35,6 @@ def read_raw_measurement(raw_file_path: str, **kwargs):
     # Session parameters
     raw_id = raw_file_path.stem
     raw.info.update(fid=raw_id)
-    raw.info.update(is_annotated=bool(raw.annotations))
 
     if not bool(raw.get_montage()):
         logger.info(f'Channel locations are missing from the file')
@@ -48,16 +46,6 @@ def read_raw_measurement(raw_file_path: str, **kwargs):
         except Exception as e:
             logger.error(e)
             return raw
-
-    if kwargs['add_info']:
-        id_split = raw_id.split('_')
-        subject = id_split[0]
-        condition = id_split[1]
-        num_day = [x for x in id_split[-1] if x.isdigit()][0]
-
-        raw.info.update(subject=subject,
-                        condition=condition,
-                        num_day=num_day)
 
     return raw
 

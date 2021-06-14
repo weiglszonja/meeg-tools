@@ -82,7 +82,7 @@ def run_ica(epochs: Epochs) -> ICA:
 
 
 def run_autoreject(epochs: Epochs, n_jobs: int = 11,
-                   subset: bool = False) -> autoreject.AutoReject:
+                   subset: bool = False) -> autoreject.RejectLog:
     """
     Drop bad epochs based on AutoReject.
     Parameters
@@ -99,16 +99,18 @@ def run_autoreject(epochs: Epochs, n_jobs: int = 11,
 
     n_epochs = len(epochs)
     if subset:
-        print(f'Fitting autoreject on random (n={int(n_epochs * 0.25)}) '
-              f'subset of epochs: ')
+        logger.info(f'Fitting autoreject on random (n={int(n_epochs * 0.25)}) '
+                    f'subset of epochs: ')
         subset = sample(set(np.arange(0, n_epochs, 1)), int(n_epochs * 0.25))
         ar.fit(epochs[subset])
 
     else:
-        print(f'Fitting autoreject on (n={n_epochs}) epochs: ')
+        logger.info(f'Fitting autoreject on (n={n_epochs}) epochs: ')
         ar.fit(epochs)
 
-    return ar
+    reject_log = ar.get_reject_log(epochs)
+
+    return reject_log
 
 
 def run_ransac(epochs: Epochs, n_jobs: int = 11) -> Epochs:

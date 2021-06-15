@@ -71,12 +71,15 @@ def get_events_from_annotations(raw: Raw) -> np.ndarray:
 
         epoch_events = make_fixed_length_events(raw_segment,
                                                 id=int(current_event[2]),
-                                                first_samp=True,
+                                                first_samp=False,
                                                 duration=duration)
+
+        epoch_events[..., 0] = epoch_events[..., 0] + current_event[..., 0]
 
         events_array = np.append(events_array, epoch_events, axis=0)
 
     events_array = np.delete(events_array, [0], axis=0)
+    events_array = np.append(events_array, [events[-1]], axis=0)
 
     return events_array
 

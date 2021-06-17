@@ -1,3 +1,4 @@
+[![Paper](https://github.com/weiglszonja/eeg-preprocessing/actions/workflows/paper.yml/badge.svg)](https://github.com/weiglszonja/eeg-preprocessing/actions/workflows/paper.yml)
 [![flake8](https://github.com/weiglszonja/eeg-preprocessing/actions/workflows/pylint.yml/badge.svg)](https://github.com/weiglszonja/eeg-preprocessing/actions/workflows/pylint.yml)
 [![Unittests](https://github.com/weiglszonja/eeg-preprocessing/actions/workflows/testing.yml/badge.svg)](https://github.com/weiglszonja/eeg-preprocessing/actions/workflows/testing.yml)
 [![PyPI version](https://badge.fury.io/py/eeg-preprocessing.svg)](https://badge.fury.io/py/eeg-preprocessing)

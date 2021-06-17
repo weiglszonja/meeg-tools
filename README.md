@@ -1,4 +1,4 @@
-[![Pylint](https://github.com/weiglszonja/eeg-preprocessing/actions/workflows/workflow.yml/badge.svg)](https://github.com/weiglszonja/eeg-preprocessing/actions/workflows/workflow.yml)
+[![flake8](https://github.com/weiglszonja/eeg-preprocessing/actions/workflows/pylint.yml/badge.svg)](https://github.com/weiglszonja/eeg-preprocessing/actions/workflows/pylint.yml)
 [![Unittests](https://github.com/weiglszonja/eeg-preprocessing/actions/workflows/testing.yml/badge.svg)](https://github.com/weiglszonja/eeg-preprocessing/actions/workflows/testing.yml)
 [![PyPI version](https://badge.fury.io/py/eeg-preprocessing.svg)](https://badge.fury.io/py/eeg-preprocessing)
 [![GitHub license](https://img.shields.io/github/license/weiglszonja/eeg-preprocessing)](https://github.com/weiglszonja/eeg-preprocessing/blob/master/LICENSE)

@@ -8,4 +8,5 @@ joblib
 sklearn
 matplotlib
 ipyfilechooser
+unittest
 #pywin32

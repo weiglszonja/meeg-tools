@@ -25,6 +25,7 @@ affiliations:
 date: 17 July 2021
 bibliography: paper.bib
 
+---
 
 # Summary
 
@@ -36,7 +37,7 @@ process.
 
 # Statement of need
 
-The eeg-preprocessing package aims to serve as a semiautomatic and reproducible
+The `eeg-preprocessing` package aims to serve as a semiautomatic and reproducible
 framework for preprocessing EEG signals prior to time-frequency-based analyses.
 It aids researchers from the (cognitive) neuroscience community to preprocess
 signals without having a lot of expertise in working with EEG signals.

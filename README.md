@@ -1,4 +1,6 @@
-[![Pylint](https://github.com/weiglszonja/eeg-preprocessing/actions/workflows/workflow.yml/badge.svg)](https://github.com/weiglszonja/eeg-preprocessing/actions/workflows/workflow.yml)
+[![Paper](https://github.com/weiglszonja/eeg-preprocessing/actions/workflows/paper.yml/badge.svg)](https://github.com/weiglszonja/eeg-preprocessing/actions/workflows/paper.yml)
+[![flake8](https://github.com/weiglszonja/eeg-preprocessing/actions/workflows/pylint.yml/badge.svg)](https://github.com/weiglszonja/eeg-preprocessing/actions/workflows/pylint.yml)
+[![Unittests](https://github.com/weiglszonja/eeg-preprocessing/actions/workflows/testing.yml/badge.svg)](https://github.com/weiglszonja/eeg-preprocessing/actions/workflows/testing.yml)
 [![PyPI version](https://badge.fury.io/py/eeg-preprocessing.svg)](https://badge.fury.io/py/eeg-preprocessing)
 [![GitHub license](https://img.shields.io/github/license/weiglszonja/eeg-preprocessing)](https://github.com/weiglszonja/eeg-preprocessing/blob/master/LICENSE)
 
@@ -109,13 +111,8 @@ spherical splines (Perrin et al., 1989) to interpolate the bad sensors.
 # Usage
 
 The `tutorials` folder contains a sample jupyter notebook that demonstrates the
-preprocessing pipeline. You can follow the instructions in the notebook. Note
-that the custom method for loading raw EEG data expects BrainVision (.vhdr) and
-EDF (.edf) files. However, importing data from other formats can be done with
-mne-Python.
-See [this](https://mne.tools/stable/auto_tutorials/io/20_reading_eeg_data.html)
-documentation for further details. you can use the data loading utilities from
-mne-Python.
+preprocessing pipeline. See [this](https://mne.tools/stable/auto_tutorials/io/20_reading_eeg_data.html)
+documentation about supported EEG file formats. 
 
 ```bash
 $ jupyter notebook tutorials/run_preprocessing_tutorial.ipynb
@@ -141,8 +138,7 @@ def run_pipeline(source: str):
              file.endswith(('.edf', '.vhdr', '.fif.gz'))]
 
     for file in files:
-        raw = read_raw_measurement(raw_file_path=os.path.join(source, file),
-                                   add_info=False)
+        raw = read_raw_measurement(raw_file_path=os.path.join(source, file))
         print(raw.info)
 
         # create epochs from filtered continuous data
@@ -165,7 +161,7 @@ def run_pipeline(source: str):
         epochs_ransac = run_ransac(epochs_autoreject)
 
         # set average reference
-        epochs_ransac.set_eeg_reference('average', projection=True)
+        epochs_ransac.set_eeg_reference('average')
 
         # save clean epochs
         fid = epochs_autoreject.info['fid']
@@ -179,6 +175,14 @@ def run_pipeline(source: str):
 if __name__ == '__main__':
     run_pipeline(source='/Volumes/crnl-memo-hd/EEG')
 
+```
+
+## Tests
+
+Run unittests from the terminal with:
+
+```bash
+$ python -m unittest
 ```
 
 ## Contribution

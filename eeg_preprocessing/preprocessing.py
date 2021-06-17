@@ -56,8 +56,9 @@ def run_ica(epochs: Epochs) -> ICA:
     """
     Runs ICA decomposition on Epochs instance.
 
-    If there are no EOG channels found, it uses 'Fp1' and 'Fp2' channels to
-    identify and mark EOG components.
+    If there are no EOG channels found, it tries to use 'Fp1' and 'Fp2' as EOG
+    channels; if they are not found either, it chooses the first two channels
+    to identify EOG components with mne.preprocessing.ica.find_bads_eog().
     Parameters
     ----------
     epochs: the instance to be used for ICA decomposition
@@ -68,15 +69,20 @@ def run_ica(epochs: Epochs) -> ICA:
     ica = ICA(n_components=settings['ica']['n_components'],
               random_state=42,
               method=settings['ica']['method'])
-    ica.fit(epochs, decim=settings['ica']['decim'])
+    ica_epochs = epochs.copy()
+    ica.fit(ica_epochs, decim=settings['ica']['decim'])
 
     if 'eog' not in epochs.get_channel_types():
-        epochs.set_channel_types({'Fp1': 'eog', 'Fp2': 'eog'})
+        if 'Fp1' and 'Fp2' in epochs.get_montage().ch_names:
+            eog_channels = ['Fp1', 'Fp2']
+        else:
+            eog_channels = epochs.get_montage().ch_names[:2]
+        logger.info('EOG channels are not found. Attempting to use '
+                    f'{",".join(eog_channels)} channels as EOG channels.')
+        ica_epochs.set_channel_types({ch: 'eog' for ch in eog_channels})
 
-    eog_indices, eog_scores = ica.find_bads_eog(epochs)
+    eog_indices, _ = ica.find_bads_eog(ica_epochs)
     ica.exclude = eog_indices
-
-    epochs.set_channel_types({'Fp1': 'eeg', 'Fp2': 'eeg'})
 
     return ica
 
@@ -132,6 +138,11 @@ def run_ransac(epochs: Epochs, n_jobs: int = 11) -> Epochs:
         bads_str = ', '.join(ransac.bad_chs_)
         epochs_ransac.info.update(
             description=epochs_ransac.info[
-                            'description'] + ', interpolated: ' + bads_str)
+                            'description'] + f', ({len(ransac.bad_chs_)}) '
+                                             f'interpolated: ' + bads_str)
+    else:
+        epochs_ransac.info.update(
+            description=epochs_ransac.info[
+                            'description'] + ', (0) interpolated')
 
     return epochs_ransac

@@ -1,8 +1,6 @@
 import numpy as np
-from matplotlib import pyplot as plt
 from mne import Epochs, make_fixed_length_events, events_from_annotations
 from mne.io import Raw
-from mne.preprocessing import compute_current_source_density
 
 from .config import settings
 from .raw import filter_raw
@@ -71,42 +69,14 @@ def get_events_from_annotations(raw: Raw) -> np.ndarray:
 
         epoch_events = make_fixed_length_events(raw_segment,
                                                 id=int(current_event[2]),
-                                                first_samp=True,
+                                                first_samp=False,
                                                 duration=duration)
+
+        epoch_events[..., 0] = epoch_events[..., 0] + current_event[..., 0]
 
         events_array = np.append(events_array, epoch_events, axis=0)
 
     events_array = np.delete(events_array, [0], axis=0)
+    events_array = np.append(events_array, [events[-1]], axis=0)
 
     return events_array
-
-
-def compute_surface_laplacian(epochs: Epochs, show: True = bool,
-                              **kwargs) -> Epochs:
-    """
-    Performs a surface Laplacian transform on the Epochs instance
-    Additional arguments can be supplied, see the documentation for further
-    details:
-    https://mne.tools/dev/generated/mne.preprocessing.compute_current_source_density.html
-    Parameters
-    ----------
-    epochs: the epochs to be transformed
-    show: whether to visualize the power spectral densities before and after
-    the Laplacian transform
-    kwargs: optional keyword arguments
-
-    Returns
-    -------
-    Raw instance
-    """
-
-    epochs_csd = compute_current_source_density(epochs, **kwargs)
-
-    if show:
-        fig, ax = plt.subplots(nrows=2, ncols=1, sharex='all', sharey='all',
-                               dpi=200)
-        epochs.plot_psd(ax=ax[0], show=False)
-        epochs_csd.plot_psd(ax=ax[1], show=False)
-        plt.show()
-
-    return epochs_csd

@@ -6,11 +6,11 @@
 
 # eeg-preprocessing
 
-A semiautomatic framework for preprocessing EEG data.
+A semiautomatic framework for preprocessing EEG/MEG data.
 
 # Overview
 
-The eeg-preprocessing package serves as a cookbook for preprocessing EEG
+The `eeg-preprocessing` package serves as a cookbook for preprocessing EEG/MEG
 signals in a semiautomatic and reproducible way. The general use-case of the
 package is to use it from a Jupyter notebook. The
 `tutorials` folder contains a sample notebook that demonstrates data operations
@@ -43,14 +43,15 @@ $ source activate eeg_preprocessing
 
 # Background
 
-Electroencephalography (EEG) measures neural activity by recording electrical
-signals at the level of populations of neurons. The signals that are recorded
+Electroencephalography (EEG) and magnetoencephalography (MEG) measures neural 
+activity of the brain. The signals that are recorded
 from multiple sensors are inherently contaminated by noise. Preprocessing aims
-to attenuate noise in the EEG data without removing meaningful signals in the
-process.
+to attenuate noise in the EEG/MEG data without removing meaningful signals in the
+process. Here, we present a semiautomatic pipeline which can prepare the data 
+for functional connectivity or event related potential (ERP) analyses.
 
 The eeg-preprocessing package aims to serve as a semiautomatic and reproducible
-framework for preprocessing EEG signals prior to time-frequency-based analyses.
+framework for preprocessing EEG/MEG signals prior to time-frequency-based analyses.
 It minimizes the manual steps required to clean the data based on visual
 inspection and reduces the number of choices that depend on the researcher for
 rejecting segments of data or interpolation of electrodes. This package
@@ -104,7 +105,7 @@ selects a random subsample of good channels to make predictions of each channel
 in small non-overlapping 4 seconds long time windows. It uses a method of
 spherical splines (Perrin et al., 1989) to interpolate the bad sensors.
 
- Additionally, the EEG reference can be changed to a “virtual reference” that 
+ Additionally, the EEG/MEG reference can be changed to a “virtual reference” that 
  is the average of all channels using mne-Python.
 
 
@@ -112,7 +113,7 @@ spherical splines (Perrin et al., 1989) to interpolate the bad sensors.
 
 The `tutorials` folder contains a sample jupyter notebook that demonstrates the
 preprocessing pipeline. See [this](https://mne.tools/stable/auto_tutorials/io/20_reading_eeg_data.html)
-documentation about supported EEG file formats. 
+documentation about supported file formats. 
 
 ```bash
 $ jupyter notebook tutorials/run_preprocessing_tutorial.ipynb

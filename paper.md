@@ -11,7 +11,7 @@ tags:
   - autoreject
   - RANSAC
 authors:
-  - name: Anna Szonja Weigl^[first author]
+  - name: Anna Szonja Weigl
     orcid: 0000-0001-6615-1360
     affiliation: 1 
   - name: Dezso Nemeth

@@ -15,12 +15,14 @@ authors:
     affiliation: 1 
   - name: Dezso Nemeth
     orcid: 0000-0002-9629-5856
-    affiliation: "1, 2"
+    affiliation: "1, 2, 3"
 affiliations:
- - name: Université Claude Bernard Lyon 1, Villeurbanne, Auvergne-Rhône-Alpes, France
+ - name: Lyon Neuroscience Research Center (CRNL), INSERM U1028, CNRS UMR5292, Université de Lyon 1, Université de Lyon, Lyon, France
    index: 1
- - name: Eötvös Loránd University, Budapest, Hungary
+ - name: Institute of Psychology, ELTE Eötvös Loránd University, Budapest, Hungary
    index: 2
+ - name: Brain, Memory and Language Research Group, Institute of Cognitive Neuroscience and Psychology, Research Centre for Natural Sciences, Budapest, Hungary
+   index: 3
 date: 17 June 2021
 bibliography: paper.bib
 
@@ -32,7 +34,8 @@ Electroencephalography (EEG) measures neural activity by recording electrical
 signals at the level of populations of neurons. The signals that are recorded
 from multiple sensors are inherently contaminated by noise. Preprocessing aims
 to attenuate noise in the EEG data without removing meaningful signals in the
-process.
+process. Here, we present a semiautomatic pipeline which can prepare the data 
+for functional connectivity or event related potential (ERP) analyses.
 
 # Statement of need
 
@@ -40,8 +43,8 @@ The `eeg-preprocessing` package aims to serve as a semiautomatic and reproducibl
 framework for preprocessing EEG signals prior to time-frequency-based analyses.
 It aids researchers from the (cognitive) neuroscience community to preprocess
 signals without having a lot of expertise in working with EEG signals.
-It minimizes the manual steps required to clean the data based on visual
-inspection and reduces subjectivity in rejecting segments of data or 
+It reduces the manual steps required to clean the data based on visual
+inspection, and the subjectivity in rejecting segments of data or 
 interpolation of electrodes. This package
 utilizes modules from `MNE-Python` [@10.3389/fnins.2013.00267], a popular open-source
 Python package for working with neurophysiological data. For automated
@@ -99,7 +102,10 @@ spherical splines [@Perrin1989] to interpolate the bad sensors.
 
 # Acknowledgements
 
-The author would like to acknowledge the contributions of Zsofia Zavecz, PhD. 
-Her valuable insights helped to establish the preprocessing pipeline.
+This research was supported by the National Brain Research Program 
+(project 2017-1.2.1-NKP-2017-00002); Hungarian Scientific Research Fund 
+(NKFIH-OTKA K 128016, to D.N.); IDEXLYON Fellowship of the University of 
+Lyon as part of the Programme Investissements d'Avenir (ANR-16-IDEX-0005) 
+(to D.N.). We thank Zsofia Zavecz for her useful comments and suggestions. 
 
 # References

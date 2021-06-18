@@ -1,9 +1,10 @@
 ---
-title: 'eeg-preprocessing: A framework for semiautomatic preprocessing of EEG data'
+title: 'eeg-preprocessing: A framework for semiautomatic preprocessing of EEG/MEG data'
 tags:
   - Python
   - Jupyter Notebook
   - EEG
+  - MEG
   - preprocessing
   - pipeline
   - mne-Python
@@ -30,19 +31,19 @@ bibliography: paper.bib
 
 # Summary
 
-Electroencephalography (EEG) measures neural activity by recording electrical
-signals at the level of populations of neurons. The signals that are recorded
+Electroencephalography (EEG) and magnetoencephalography (MEG) measures neural 
+activity of the brain. The signals that are recorded
 from multiple sensors are inherently contaminated by noise. Preprocessing aims
-to attenuate noise in the EEG data without removing meaningful signals in the
+to attenuate noise in the EEG/MEG data without removing meaningful signals in the
 process. Here, we present a semiautomatic pipeline which can prepare the data 
 for functional connectivity or event related potential (ERP) analyses.
 
 # Statement of need
 
 The `eeg-preprocessing` package aims to serve as a semiautomatic and reproducible
-framework for preprocessing EEG signals prior to time-frequency-based analyses.
+framework for preprocessing EEG/MEG signals prior to time-frequency-based analyses.
 It aids researchers from the (cognitive) neuroscience community to preprocess
-signals without having a lot of expertise in working with EEG signals.
+signals without having a lot of expertise in working with EEG/MEG signals.
 It reduces the manual steps required to clean the data based on visual
 inspection, and the subjectivity in rejecting segments of data or 
 interpolation of electrodes. This package
@@ -97,7 +98,7 @@ selects a random subsample of good channels to make predictions of each channel
 in small non-overlapping 4 seconds long time windows. It uses a method of
 spherical splines [@Perrin1989] to interpolate the bad sensors.
 
- Additionally, the EEG reference can be changed to a “virtual reference” that 
+ Additionally, the EEG/MEG reference can be changed to a “virtual reference” that 
  is the average of all channels using `MNE-Python`.
 
 # Acknowledgements

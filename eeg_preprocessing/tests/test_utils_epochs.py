@@ -76,3 +76,20 @@ class TestEpochs(unittest.TestCase):
         assert len(epochs) == 21
         assert epochs.event_id == {'1': 1, '2': 2, '3': 3}
         assert len(epochs[0]) == 1
+
+    def test_create_epochs_without_events_to_exclude(self):
+        from eeg_preprocessing.utils.epochs import create_epochs
+        from eeg_preprocessing.utils.config import settings
+
+        settings['epochs']['duration'] = 1
+
+        annotations = Annotations(onset=[3, 10, 10.5, 11, 22],
+                                  duration=[1, 0.5, 0.25, 1, 1],
+                                  description=[1, 2, 3, 1, 2])
+
+        self.raw.set_annotations(annotations)
+
+        epochs = create_epochs(self.raw, events_to_exclude=[2, 5])
+
+        assert len(epochs) == 19
+        assert epochs.event_id == {'1': 1, '3': 3}

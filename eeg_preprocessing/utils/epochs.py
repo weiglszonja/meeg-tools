@@ -7,7 +7,7 @@ from .raw import filter_raw
 from mne.utils import logger
 
 
-def create_epochs(raw: Raw) -> Epochs:
+def create_epochs(raw: Raw, events_to_exclude: list = []) -> Epochs:
     """
     Create non-overlapping segments from Raw instance.
     If there are annotations (trigger) found in the raw data, it creates
@@ -16,6 +16,7 @@ def create_epochs(raw: Raw) -> Epochs:
     Parameters
     ----------
     raw: the continuous data to be segmented into non-overlapping epochs
+    events_to_exclude: the list of event ids to exclude before creating the epochs
 
     Returns
     -------
@@ -34,6 +35,7 @@ def create_epochs(raw: Raw) -> Epochs:
         logger.info('Creating epochs from annotations ...')
         events = get_events_from_annotations(raw_bandpass)
 
+    events = events[~np.isin(events[..., 2], events_to_exclude)]
     epochs = Epochs(raw=raw_bandpass,
                     events=events,
                     picks='all',

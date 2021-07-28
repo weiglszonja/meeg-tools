@@ -64,7 +64,7 @@ def get_events_from_annotations(raw: Raw) -> np.ndarray:
         next_event = events[event_ind + 1]
 
         # events with shorter duration (less than the duration of the epochs)
-        if next_event[0] / sfreq - current_event[0] / sfreq < duration:
+        if (next_event[0] / sfreq) - (current_event[0] / sfreq) < duration:
             events_array = np.append(events_array, [events[event_ind]], axis=0)
             continue
 
@@ -87,24 +87,28 @@ def get_events_from_annotations(raw: Raw) -> np.ndarray:
     return events_array
 
 
-def exclude_epochs_before_incorrect_answers(epochs: Epochs, incorrect_answers: list) -> Epochs:
+def exclude_epochs_before_incorrect_answers(epochs: Epochs,
+                                            incorrect_answers: list) -> Epochs:
     """
-    Excludes epochs that are followed by an incorrect answer trigger. Triggers are specified in a list
-    e.g. [44, 45, 46, 47, 144, 145, 146, 147].
+    Excludes epochs that are followed by an incorrect answer trigger.
+    Triggers are specified in a list e.g. [44, 45, 46, 47, 144, 145, 146, 147].
 
     Parameters
     ----------
-    epochs: the data where data segments that are followed by an incorrect answer are removed
-    incorrect_answers: the list of event ids that are denoted as incorrect answers
+    epochs: the data where data segments that are followed by an incorrect
+    answer are removed
+    incorrect_answers: the list of event ids that are denoted as incorrect
 
     Returns
     -------
     Epochs instance
     """
     if incorrect_answers:
-        incorrect_answers_indices = np.argwhere(np.isin(epochs.events[..., 2], incorrect_answers)).ravel()
+        incorrect_answers_indices = np.argwhere(
+            np.isin(epochs.events[..., 2], incorrect_answers)).ravel()
         epoch_indices_to_exclude = incorrect_answers_indices - 1
     else:
         epoch_indices_to_exclude = []
 
-    return epochs.copy().drop(epoch_indices_to_exclude, reason='INCORRECT ANSWER')
+    return epochs.copy().drop(epoch_indices_to_exclude,
+                              reason='INCORRECT ANSWER')

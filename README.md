@@ -116,7 +116,7 @@ preprocessing pipeline. See [this](https://mne.tools/stable/auto_tutorials/io/20
 documentation about supported file formats. 
 
 ```bash
-$ jupyter notebook tutorials/run_preprocessing_tutorial.ipynb
+$ jupyter notebook tutorials/preprocessing_tutorial_without_triggers.ipynb
 ```
 
 Or you can import the methods into your own project and setup the pipeline with

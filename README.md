@@ -12,6 +12,8 @@ In association with the Lyon Neuroscience Research Center (Lyon), Memo Team, PI:
 
 A semiautomatic framework for preprocessing EEG/MEG data.
 
+
+![Pipeline diagram](tutorials/static/preprocessing_pipeline_diagram.svg)
 # Overview
 
 The `eeg-preprocessing` package serves as a cookbook for preprocessing EEG/MEG

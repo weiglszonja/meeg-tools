@@ -4,6 +4,10 @@
 [![PyPI version](https://badge.fury.io/py/eeg-preprocessing.svg)](https://badge.fury.io/py/eeg-preprocessing)
 [![GitHub license](https://img.shields.io/github/license/weiglszonja/eeg-preprocessing)](https://github.com/weiglszonja/eeg-preprocessing/blob/master/LICENSE)
 
+![Team Logo](tutorials/static/bml_équipememo.png) ![CRNL Logo](tutorials/static/crnl_logo.png)
+
+In association with the Lyon Neuroscience Research Center (Lyon), Memo Team, PI: [Dezso Nemeth](https://www.memoteam.org).
+
 # eeg-preprocessing
 
 A semiautomatic framework for preprocessing EEG/MEG data.

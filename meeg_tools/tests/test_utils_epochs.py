@@ -14,8 +14,8 @@ class TestEpochs(unittest.TestCase):
         self.raw = read_raw(fname=self.raw_file_path)
 
     def test_create_epochs_without_annotations(self):
-        from eeg_preprocessing.utils.epochs import create_epochs
-        from eeg_preprocessing.utils.config import settings
+        from meeg_tools.utils.epochs import create_epochs
+        from meeg_tools.utils.config import settings
 
         settings['epochs']['duration'] = 2
 
@@ -35,8 +35,8 @@ class TestEpochs(unittest.TestCase):
         assert epochs.event_id == {'1': 1}
 
     def test_create_epochs_from_events(self):
-        from eeg_preprocessing.utils.epochs import create_epochs_from_events
-        from eeg_preprocessing.utils.config import settings
+        from meeg_tools.utils.epochs import create_epochs_from_events
+        from meeg_tools.utils.config import settings
 
         settings['epochs']['start_time'] = -0.2
         settings['epochs']['end_time'] = 0.5

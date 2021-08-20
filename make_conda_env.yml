@@ -1,4 +1,4 @@
-name: eeg_preprocessing
+name: meeg_tools
 channels:
 - defaults
 - anaconda

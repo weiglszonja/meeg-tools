@@ -9,7 +9,7 @@ class TestRaw(unittest.TestCase):
                                           'sample', 'sample_audvis_raw.fif')
 
     def test_read_raw_measurement(self) -> None:
-        from eeg_preprocessing.utils.raw import read_raw_measurement
+        from meeg_tools.utils.raw import read_raw_measurement
 
         raw = read_raw_measurement(raw_file_path=self.raw_file_path)
         assert raw.info['fid'] == 'sample_audvis_raw'
@@ -17,8 +17,8 @@ class TestRaw(unittest.TestCase):
 
     def test_filter_raw(self) -> None:
         from mne.io import read_raw
-        from eeg_preprocessing.utils.raw import filter_raw
-        from eeg_preprocessing.utils.config import settings
+        from meeg_tools.utils.raw import filter_raw
+        from meeg_tools.utils.config import settings
 
         settings['bandpass_filter']['low_freq'] = 1
         settings['bandpass_filter']['high_freq'] = 30

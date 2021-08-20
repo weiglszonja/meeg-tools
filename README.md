@@ -9,49 +9,50 @@
 In association with the Lyon Neuroscience Research Center (Lyon), Memo Team,
 PI: [Dezso Nemeth](https://www.memoteam.org).
 
-# eeg-preprocessing
+# meeg-tools
 
-A semiautomatic framework for preprocessing EEG/MEG data.
+EEG/MEG data preprocessing and analyses framework
 
-![Pipeline diagram](tutorials/static/preprocessing_pipeline_diagram.svg)
 
 ## Overview
 
-The `eeg-preprocessing` package serves as a cookbook for preprocessing EEG/MEG
+The `meeg-tools` serves as a cookbook for preprocessing and analyzing EEG/MEG
 signals in a semiautomatic and reproducible way. The general use-case of the
 package is to use it from a Jupyter notebook. The
-`tutorials` folder contains a sample notebook that demonstrates data operations
-such as loading and writing the data along with the transformation steps that
-are described in the Background section.
+`tutorials` folder contains notebooks that demonstrate data operations
+and transformations that are described in the Background section.
 
 ## Installation
 
 Install the latest version from PyPI into an existing environment:
 
 ```bash
-$ pip install eeg_preprocessing
+$ pip install meeg_tools
 ```
 
 Since this project is under development, I would recommend installing it from
 source in editable mode with pip:
 
 ```bash
-$ git clone https://github.com/weiglszonja/eeg-preprocessing.git
-$ cd eeg-preprocessing
+$ git clone https://github.com/weiglszonja/meeg-tools.git
+$ cd meeg-tools
 $ pip install -e .
 ```
 
 Alternatively, you can install it in a new virtual environment with conda:
 
 ```bash
-$ git clone https://github.com/weiglszonja/eeg-preprocessing.git
-$ conda env create -f eeg-preprocessing/make_conda_env.yml
-$ source activate eeg_preprocessing
+$ git clone https://github.com/weiglszonja/meeg-tools.git
+$ conda env create -f meeg-tools/make_conda_env.yml
+$ source activate meeg_tools
 ```
 
 ## Background
 
 ### Preprocessing
+
+![Pipeline diagram](tutorials/static/preprocessing_pipeline_diagram.svg)
+
 
 Electroencephalography (EEG) and magnetoencephalography (MEG) measures neural
 activity of the brain. The signals that are recorded from multiple sensors are
@@ -69,8 +70,7 @@ package utilizes modules from mne-Python (Gramfort et al., 2013), a popular
 open-source Python package for working with neurophysiological data. For
 automated rejection of bad data spans and interpolation of bad electrodes it
 uses the Autoreject (Jas et al., 2017) and the Random Sample Consensus (
-RANSAC) (
-Bigdely-Shamlo et al., 2015) packages.
+RANSAC) (Bigdely-Shamlo et al., 2015) packages.
 
 The general use-case of the package is to use it from a Jupyter notebook.
 The `tutorials` folder contains notebooks demonstrating data operations such as
@@ -151,11 +151,11 @@ $ python -m unittest
 
 This project is under development; comments are all welcome and encouraged!
 Suggestions related to this project can be made with opening an
-[issue](https://github.com/weiglszonja/eeg-preprocessing/issues/new)
+[issue](https://github.com/weiglszonja/meeg-tools/issues/new)
 at the issue tracker of the project. Contributions and enhancements to the code
 can be made by forking the project first; committing changes to the forked
 project and then opening a pull request from the forked branch to the master
-branch of eeg-preprocessing.
+branch of meeg-tools.
 
 
 ## References

@@ -3,7 +3,7 @@ import unittest
 from mne import datasets
 from mne.io import read_raw
 
-from eeg_preprocessing.utils.epochs import create_epochs
+from meeg_tools.utils.epochs import create_epochs
 
 
 class TestPreprocessing(unittest.TestCase):
@@ -12,24 +12,24 @@ class TestPreprocessing(unittest.TestCase):
                                           'sample', 'sample_audvis_raw.fif')
 
         self.raw = read_raw(fname=self.raw_file_path)
-        self.epochs = create_epochs(self.raw).pick_types(eeg=True)
+        self.epochs = create_epochs(self.raw).load_data().pick_types(eeg=True)
 
     def test_prepare_epochs_for_ica(self):
-        from eeg_preprocessing.preprocessing import prepare_epochs_for_ica
+        from meeg_tools.preprocessing import prepare_epochs_for_ica
 
         assert not any(self.epochs.drop_log)
         epochs_faster = prepare_epochs_for_ica(epochs=self.epochs)
 
         bad_epochs_indices = [drop_ind for drop_ind, drop in
                               enumerate(epochs_faster.drop_log) if drop]
-        assert len(bad_epochs_indices) == 18
+        assert len(bad_epochs_indices) == 24
         assert bad_epochs_indices == [14, 30, 60, 100, 113, 123, 188, 218, 219,
-                                      220, 232, 237, 255, 267, 268, 269, 270,
-                                      271]
+                                      220, 221, 231, 235, 236, 237, 238, 242,
+                                      243, 244, 267, 268, 269, 270, 271]
 
     def test_run_ica(self):
-        from eeg_preprocessing.preprocessing import run_ica
-        from eeg_preprocessing.utils.config import settings
+        from meeg_tools.preprocessing import run_ica
+        from meeg_tools.utils.config import settings
 
         settings['ica']['n_components'] = 32
         settings['ica']['decim'] = 3
@@ -40,7 +40,7 @@ class TestPreprocessing(unittest.TestCase):
         assert 'eog' not in self.epochs.get_channel_types()
 
     def test_run_autoreject(self):
-        from eeg_preprocessing.preprocessing import run_autoreject
+        from meeg_tools.preprocessing import run_autoreject
 
         reject_log = run_autoreject(epochs=self.epochs, subset=True)
         epochs_autoreject = self.epochs.copy().drop(reject_log.bad_epochs,
@@ -49,8 +49,9 @@ class TestPreprocessing(unittest.TestCase):
         assert len(epochs_autoreject) != len(self.epochs)
 
     def test_run_ransac(self):
-        from eeg_preprocessing.preprocessing import run_ransac
+        from meeg_tools.preprocessing import run_ransac
 
         epochs_ransac = run_ransac(epochs=self.epochs)
 
-        assert '(0) interpolated' in epochs_ransac.info['description']
+        assert 'EEG 001, EEG 009' in epochs_ransac.info[
+            'description']

@@ -108,6 +108,7 @@ def filter_raw(raw: Raw, **kwargs) -> Raw:
     raw_bandpass = raw.load_data().copy().filter(
         l_freq=settings['bandpass_filter']['low_freq'],
         h_freq=settings['bandpass_filter']['high_freq'],
+        n_jobs=8,
         **kwargs)
 
     return raw_bandpass

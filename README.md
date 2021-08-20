@@ -4,11 +4,18 @@
 [![PyPI version](https://badge.fury.io/py/eeg-preprocessing.svg)](https://badge.fury.io/py/eeg-preprocessing)
 [![GitHub license](https://img.shields.io/github/license/weiglszonja/eeg-preprocessing)](https://github.com/weiglszonja/eeg-preprocessing/blob/master/LICENSE)
 
+![Team Logo](tutorials/static/bml_équipememo.png) ![CRNL Logo](tutorials/static/crnl_logo.png)
+
+In association with the Lyon Neuroscience Research Center (Lyon), Memo Team,
+PI: [Dezso Nemeth](https://www.memoteam.org).
+
 # eeg-preprocessing
 
 A semiautomatic framework for preprocessing EEG/MEG data.
 
-# Overview
+![Pipeline diagram](tutorials/static/preprocessing_pipeline_diagram.svg)
+
+## Overview
 
 The `eeg-preprocessing` package serves as a cookbook for preprocessing EEG/MEG
 signals in a semiautomatic and reproducible way. The general use-case of the
@@ -17,15 +24,16 @@ package is to use it from a Jupyter notebook. The
 such as loading and writing the data along with the transformation steps that
 are described in the Background section.
 
-# Installation
+## Installation
 
 Install the latest version from PyPI into an existing environment:
 
 ```bash
 $ pip install eeg_preprocessing
 ```
-Since this project is under development, I would recommend installing it
-from source in editable mode with pip:
+
+Since this project is under development, I would recommend installing it from
+source in editable mode with pip:
 
 ```bash
 $ git clone https://github.com/weiglszonja/eeg-preprocessing.git
@@ -41,30 +49,33 @@ $ conda env create -f eeg-preprocessing/make_conda_env.yml
 $ source activate eeg_preprocessing
 ```
 
-# Background
+## Background
 
-Electroencephalography (EEG) and magnetoencephalography (MEG) measures neural 
-activity of the brain. The signals that are recorded
-from multiple sensors are inherently contaminated by noise. Preprocessing aims
-to attenuate noise in the EEG/MEG data without removing meaningful signals in the
-process. Here, we present a semiautomatic pipeline which can prepare the data 
-for functional connectivity or event related potential (ERP) analyses.
+### Preprocessing
+
+Electroencephalography (EEG) and magnetoencephalography (MEG) measures neural
+activity of the brain. The signals that are recorded from multiple sensors are
+inherently contaminated by noise. Preprocessing aims to attenuate noise in the
+EEG/MEG data without removing meaningful signals in the process. Here, we
+present a semiautomatic pipeline which can prepare the data for functional
+connectivity or event related potential (ERP) analyses.
 
 The eeg-preprocessing package aims to serve as a semiautomatic and reproducible
-framework for preprocessing EEG/MEG signals prior to time-frequency-based analyses.
-It minimizes the manual steps required to clean the data based on visual
-inspection and reduces the number of choices that depend on the researcher for
-rejecting segments of data or interpolation of electrodes. This package
-utilizes modules from mne-Python (Gramfort et al., 2013), a popular open-source
-Python package for working with neurophysiological data. For automated
-rejection of bad data spans and interpolation of bad electrodes it uses the
-Autoreject (Jas et al., 2017) and the Random Sample Consensus (RANSAC) (
+framework for preprocessing EEG/MEG signals prior to time-frequency-based
+analyses. It minimizes the manual steps required to clean the data based on
+visual inspection and reduces the number of choices that depend on the
+researcher for rejecting segments of data or interpolation of electrodes. This
+package utilizes modules from mne-Python (Gramfort et al., 2013), a popular
+open-source Python package for working with neurophysiological data. For
+automated rejection of bad data spans and interpolation of bad electrodes it
+uses the Autoreject (Jas et al., 2017) and the Random Sample Consensus (
+RANSAC) (
 Bigdely-Shamlo et al., 2015) packages.
 
 The general use-case of the package is to use it from a Jupyter notebook.
-The `tutorials` folder contains a sample notebook that demonstrates data
-operations such as loading and writing the data along with the transformation
-steps that are described below.
+The `tutorials` folder contains notebooks demonstrating data operations such as
+loading and writing the data along with the transformation steps that are
+described below.
 
 In order to remove high-frequency artefacts and low-frequency drifts, a
 zero-phase band-pass filter (0.5 - 45 Hz) is applied to the continuous data
@@ -88,16 +99,16 @@ method is the infomax algorithm that finds independent signals by maximizing
 entropy as described by (Bell & Sejnowski, 1995), (Nadal & Parga, 1999).
 Components containing blink artefacts are automatically identified using
 mne-Python. The interactive visualization of ICA sources lets the user decide
-which components should be rejected based on their topographies, time-courses
-or frequency spectra. The number of components that were removed from the data
-are documented in the “description” field of the epochs instance “info”
-structure. The final step of epoch rejection is to apply Autoreject (Jas et
-al., 2017) on the ICA cleaned data. Autoreject uses unsupervised learning to
-estimate the rejection threshold for the epochs. In order to reduce computation
-time that increases with the number of segments and channels, autoreject can be
-fitted on a representative subset of epochs (25% of total epochs). Once the
-parameters are learned, the solution can be applied to any data that contains
-channels that were used during fit.
+which components should be rejected based on their topographies and
+time-courses. The number of components that were removed from the data are
+documented in the “description” field of the epochs instance “info” structure.
+The final step of epoch rejection is to apply Autoreject (Jas et al., 2017) on
+the ICA cleaned data. Autoreject uses unsupervised learning to estimate the
+rejection threshold for the epochs. In order to reduce computation time that
+increases with the number of epochs and channels, it is possibe to fit autoreject
+on a representative subset of epochs (25% of total epochs). Once the parameters
+are learned, the solution can be applied to any data that contains channels
+that were used during fit.
 
 The final step of preprocessing is to find and interpolate outlier channels.
 The Random Sample Consensus (RANSAC) algorithm (Fischler & Bolles, 1981)
@@ -105,77 +116,27 @@ selects a random subsample of good channels to make predictions of each channel
 in small non-overlapping 4 seconds long time windows. It uses a method of
 spherical splines (Perrin et al., 1989) to interpolate the bad sensors.
 
- Additionally, the EEG/MEG reference can be changed to a “virtual reference” that 
- is the average of all channels using mne-Python.
+Additionally, the EEG/MEG reference can be changed to a “virtual reference”
+that is the average of all channels using mne-Python.
 
+### Time-frequency analysis
 
-# Usage
-
-The `tutorials` folder contains a sample jupyter notebook that demonstrates the
-preprocessing pipeline. See [this](https://mne.tools/stable/auto_tutorials/io/20_reading_eeg_data.html)
-documentation about supported file formats. 
+The `tutorials` folder contains a jupyter notebook that demonstrates the usage
+of some functions available in mne-Python for time-frequency analysis.
 
 ```bash
-$ jupyter notebook tutorials/run_preprocessing_tutorial.ipynb
+$ jupyter notebook tutorials/time_frequency_analysis_tutorial.ipynb
 ```
 
-Or you can import the methods into your own project and setup the pipeline with
-a Python script:
+## Usage
 
-```python
-import os
+The `tutorials` folder contains a sample jupyter notebook that demonstrates the
+preprocessing pipeline.
+See [this](https://mne.tools/stable/auto_tutorials/io/20_reading_eeg_data.html)
+documentation about supported file formats.
 
-from eeg_preprocessing.preprocessing import prepare_epochs_for_ica, run_ica, \
-    run_autoreject, run_ransac
-from eeg_preprocessing.utils.raw import read_raw_measurement
-from eeg_preprocessing.utils.epochs import create_epochs
-
-
-def run_pipeline(source: str):
-    target_path = os.path.join(source, 'preprocessed')
-    if not os.path.exists(target_path):
-        os.makedirs(target_path)
-    files = [file for file in os.listdir(source) if
-             file.endswith(('.edf', '.vhdr', '.fif.gz'))]
-
-    for file in files:
-        raw = read_raw_measurement(raw_file_path=os.path.join(source, file))
-        print(raw.info)
-
-        # create epochs from filtered continuous data
-        epochs = create_epochs(raw=raw)
-
-        # initial rejection of bad epochs
-        epochs_faster = prepare_epochs_for_ica(epochs=epochs)
-
-        ica = run_ica(epochs=epochs_faster)
-        # uncomment the line below to visualize ICA sources
-        # block=True halts the execution of code until the plot is closed
-        #ica.plot_sources(epochs_faster, start=0, stop=10, block=True)
-        ica.apply(epochs_faster)
-        epochs_faster.info['description'] = f'n_components: {len(ica.exclude)}'
-
-        reject_log = run_autoreject(epochs_faster, n_jobs=11, subset=False)
-        epochs_autoreject = epochs_faster.copy().drop(reject_log.bad_epochs,
-                                                      reason='AUTOREJECT')
-
-        epochs_ransac = run_ransac(epochs_autoreject)
-
-        # set average reference
-        epochs_ransac.set_eeg_reference('average')
-
-        # save clean epochs
-        fid = epochs_autoreject.info['fid']
-        epochs_clean_fname = f'{fid}_ICA_autoreject_ransac'
-        postfix = '-epo.fif.gz'
-        epochs_ransac.save(
-            os.path.join(target_path, f'{epochs_clean_fname}{postfix}'),
-            overwrite=False)
-
-
-if __name__ == '__main__':
-    run_pipeline(source='/Volumes/crnl-memo-hd/EEG')
-
+```bash
+$ jupyter notebook tutorials/preprocessing_tutorial_without_triggers.ipynb
 ```
 
 ## Tests

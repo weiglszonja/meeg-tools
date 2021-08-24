@@ -101,28 +101,49 @@ def run_autoreject(epochs: Epochs, n_jobs: int = 11,
     -------
     Autoreject instance
     """
+    if not epochs.preload:
+        epochs_autoreject = epochs.copy().load_data()
+    else:
+        epochs_autoreject = epochs.copy()
+
     ar = autoreject.AutoReject(random_state=42, n_jobs=n_jobs)
 
-    n_epochs = len(epochs)
+    n_epochs = len(epochs_autoreject)
     if subset:
         logger.info(f'Fitting autoreject on random (n={int(n_epochs * 0.25)}) '
                     f'subset of epochs: ')
         subset = sample(set(np.arange(0, n_epochs, 1)), int(n_epochs * 0.25))
-        ar.fit(epochs[subset])
+        ar.fit(epochs_autoreject[subset])
 
     else:
         logger.info(f'Fitting autoreject on (n={n_epochs}) epochs: ')
-        ar.fit(epochs)
+        ar.fit(epochs_autoreject)
 
-    reject_log = ar.get_reject_log(epochs)
+    reject_log = ar.get_reject_log(epochs_autoreject)
+
+    # report bad epochs where more than 15% (value updated from config.py)
+    # of channels were marked as noisy within an epoch
+    threshold = settings['autoreject']['threshold']
+    num_bad_epochs = np.count_nonzero(reject_log.labels, axis=1)
+    bad_epochs = np.where(num_bad_epochs > threshold * epochs.info['nchan'])
+    bad_epochs = bad_epochs[0].tolist()
+
+    reject_log.report = bad_epochs
+
+    logger.info('\nAUTOREJECT report\n'
+                f'There are {len(epochs_autoreject[reject_log.bad_epochs])} '
+                f'bad epochs found with Autoreject. '
+                f'You can assess these epochs with reject_log.bad_epochs\n'
+                f'\nThere are {len(bad_epochs)} bad epochs where more than '
+                f'{int(threshold * 100)}% of the channels were noisy. '
+                f'You can assess these epochs with reject_log.report')
 
     return reject_log
 
 
-def run_ransac(epochs: Epochs, n_jobs: int = 11) -> Epochs:
+def run_ransac(epochs: Epochs, n_jobs: int = 11) -> Ransac:
     """
-    Find and interpolate bad channels with Ransac.
-    If there are no bad channels found returns the Epochs instance unmodified.
+    Find bad channels with Ransac.
     Parameters
     ----------
     epochs: the instance where bad channels to be found
@@ -130,19 +151,42 @@ def run_ransac(epochs: Epochs, n_jobs: int = 11) -> Epochs:
 
     Returns
     -------
-    Epochs instance
+    Ransac instance
     """
-    ransac = Ransac(verbose='progressbar', n_jobs=n_jobs)
-    epochs_ransac = ransac.fit_transform(epochs)
-    if ransac.bad_chs_:
-        bads_str = ', '.join(ransac.bad_chs_)
-        epochs_ransac.info.update(
-            description=epochs_ransac.info[
-                            'description'] + f', ({len(ransac.bad_chs_)}) '
-                                             f'interpolated: ' + bads_str)
+    if not epochs.preload:
+        epochs_ransac = epochs.copy().load_data()
     else:
-        epochs_ransac.info.update(
-            description=epochs_ransac.info[
-                            'description'] + ', (0) interpolated')
+        epochs_ransac = epochs.copy()
 
-    return epochs_ransac
+    ransac = Ransac(verbose='progressbar', n_jobs=n_jobs).fit(epochs_ransac)
+
+    threshold = settings['ransac']['threshold']
+    num_bad_channels = np.count_nonzero(ransac.bad_log, axis=0) / len(
+        epochs_ransac)
+    bad_channel_ids = np.where(num_bad_channels >= threshold)[0].tolist()
+
+    num_bad_channels = num_bad_channels[bad_channel_ids]
+    report_dict = dict(zip([epochs.ch_names[ch] for ch in bad_channel_ids],
+                           np.round(num_bad_channels, 2)))
+    report_dict = {k: v for k, v in
+                   sorted(report_dict.items(), key=lambda item: item[1],
+                          reverse=True)}
+
+    logger.info('\nRANSAC report\n'
+                f'There are {len(num_bad_channels)} channels that were found '
+                f'noisy for more than {int(threshold * 100)}% of the time:')
+    logger.info(
+        "\n".join("{}\t{}".format(k, v) for k, v in report_dict.items()))
+
+    if ransac.bad_chs_:
+        logger.info(f'\nRANSAC marked {", ".join(ransac.bad_chs_)} '
+                    f'channels to be interpolated.'
+                    f'You can assess these channels with ransac.bad_chs_')
+
+    else:
+        logger.info(
+            f'\nRANSAC did not mark any of these channels to be interpolated.'
+            f'You can still assess the reported channels with ransac.report')
+        ransac.report = report_dict.keys()
+
+    return ransac

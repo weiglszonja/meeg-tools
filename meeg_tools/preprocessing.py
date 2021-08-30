@@ -172,11 +172,12 @@ def run_ransac(epochs: Epochs, n_jobs: int = 11) -> Ransac:
                    sorted(report_dict.items(), key=lambda item: item[1],
                           reverse=True)}
 
-    logger.info('\nRANSAC report\n'
-                f'There are {len(num_bad_channels)} channels that were found '
-                f'noisy for more than {int(threshold * 100)}% of the time:')
-    logger.info(
-        "\n".join("{}\t{}".format(k, v) for k, v in report_dict.items()))
+    if bad_channel_ids:
+        logger.info('\nRANSAC report\n'
+                    f'There are {len(num_bad_channels)} channels that were '
+                    f'noisy for > {int(threshold * 100)}% of the time:')
+        logger.info(
+            "\n".join("{}\t{}".format(k, v) for k, v in report_dict.items()))
 
     if ransac.bad_chs_:
         logger.info(f'\nRANSAC marked {", ".join(ransac.bad_chs_)} '
@@ -185,7 +186,7 @@ def run_ransac(epochs: Epochs, n_jobs: int = 11) -> Ransac:
 
     else:
         logger.info(
-            f'\nRANSAC did not mark any of these channels to be interpolated.'
+            f'\nRANSAC did not mark any channels to be interpolated.'
             f'You can still assess the reported channels with ransac.report')
         ransac.report = list(report_dict.keys())
 

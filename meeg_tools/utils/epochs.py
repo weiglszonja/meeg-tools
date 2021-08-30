@@ -1,4 +1,5 @@
 import numpy as np
+import pandas as pd
 from mne import Epochs, find_events, events_from_annotations, \
     make_fixed_length_events
 from mne.io import Raw
@@ -73,7 +74,60 @@ def create_epochs(raw: Raw) -> Epochs:
                     event_id=list(np.unique(events[..., 2])),
                     baseline=None,
                     tmin=0.,
-                    tmax=epoch_duration_in_seconds, #- (1 / raw.info['sfreq']
+                    tmax=epoch_duration_in_seconds,  # - (1 / raw.info['sfreq']
                     preload=False)
 
     return epochs
+
+
+def create_metadata(epochs: Epochs):
+    metadata = pd.DataFrame(data=epochs.events,
+                            columns=['time_in_samples', 'stim', 'id'])
+
+    # we can add boundaries of epochs
+    epoch_boundaries = [211, 212, 213, 214, 215, 216]
+
+    edges = np.where(np.isin(epochs.events
+                             [..., 2], epoch_boundaries))[0]
+
+    boundaries = dict(zip(epoch_boundaries, edges))
+    logger.info('Found these indices for these epoch boundary events: ')
+    logger.info(
+        "\n".join("{}\t{}".format(k, v) for k, v in boundaries.items()))
+    for epoch_ind, epoch in enumerate(np.split(epochs.events, edges, axis=0)):
+        if epoch_ind != len(edges):
+            metadata.loc[metadata['time_in_samples'].isin(
+                epoch[..., 0]), 'epoch'] = epoch_ind + 1
+
+    metadata.loc[metadata['id'].isin(
+        [10, 110, 11, 111, 14, 114, 15, 115]), 'triplet'] = 'H'
+    metadata.loc[metadata['id'].isin(
+        [12, 112, 13, 113, 16, 116, 112, 113, 116]), 'triplet'] = 'L'
+    metadata.loc[
+        metadata['id'].isin([10, 110, 14, 114], ), 'triplet_type'] = 'HR'
+    metadata.loc[
+        metadata['id'].isin([12, 112, 16, 116], ), 'triplet_type'] = 'LR'
+    metadata.loc[metadata['id'].isin(
+        [11, 13, 15, 111, 113, 115], ), 'triplet_type'] = 'P'
+    metadata.loc[metadata['id'].isin(
+        [44, 45, 46, 47, 144, 145, 146, 147]), 'answer'] = 'incorrect'
+    metadata.loc[~metadata['id'].isin(
+        [44, 45, 46, 47, 144, 145, 146, 147]), 'answer'] = 'correct'
+
+    metadata.loc[
+        metadata['id'].isin([10, 11, 12, 13, 14, 15, 16]), 'sequence'] = 'A'
+    metadata.loc[
+        metadata['id'].isin(
+            [100, 111, 112, 113, 114, 115, 116]), 'sequence'] = 'B'
+
+    # find stimuli that are followed by an incorrect answer
+    stimuli = metadata[metadata['id'].isin(
+        [10, 110, 11, 111, 12, 112, 13, 113, 14, 114, 15, 115, 16, 116])]
+    stimuli_indices = np.asarray(stimuli['id'].index.tolist())
+    incorrect_indices = np.asarray(
+        metadata.index[metadata['answer'] == 'incorrect'].tolist()) - 1
+    incorrect_answers = stimuli_indices[
+        np.isin(stimuli_indices, incorrect_indices)]
+    metadata.loc[incorrect_answers, 'answer'] = 'incorrect'
+
+    return metadata

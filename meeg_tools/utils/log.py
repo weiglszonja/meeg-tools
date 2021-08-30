@@ -5,7 +5,7 @@ import pandas as pd
 from mne import Epochs
 
 
-def update_log(log_file_path: str, epochs: Epochs, notes: str):
+def update_log(log_file_path: str, epochs: Epochs, notes: str) -> pd.DataFrame:
     """
     Documents the changes during preprocessing for an Epochs object.
     Custom description can be added with the notes argument.
@@ -16,6 +16,10 @@ def update_log(log_file_path: str, epochs: Epochs, notes: str):
     log_file_path
     epochs
     notes
+
+    Returns
+    ----------
+    log data
     """
     fid = epochs.info['fid']
     dropped_epochs_marker = ['FASTER', 'USER', 'AUTOREJECT']
@@ -33,6 +37,8 @@ def update_log(log_file_path: str, epochs: Epochs, notes: str):
                         't_min': [epochs.tmin],
                         't_max': [epochs.tmax],
                         'n_interpolated': [np.NaN],
+                        'average_ref_applied': [
+                            bool(epochs.info['custom_ref_applied'])],
                         'baseline': [
                             epochs.baseline if epochs.baseline else np.NaN],
                         'notes': [notes],
@@ -53,3 +59,5 @@ def update_log(log_file_path: str, epochs: Epochs, notes: str):
         log.to_csv(log_file_path, mode='a', index=False, header=False)
     else:
         log.to_csv(log_file_path, index=False)
+
+    return log

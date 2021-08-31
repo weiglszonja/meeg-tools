@@ -1,7 +1,7 @@
 [![Paper](https://github.com/weiglszonja/eeg-preprocessing/actions/workflows/paper.yml/badge.svg)](https://github.com/weiglszonja/eeg-preprocessing/actions/workflows/paper.yml)
 [![flake8](https://github.com/weiglszonja/eeg-preprocessing/actions/workflows/pylint.yml/badge.svg)](https://github.com/weiglszonja/eeg-preprocessing/actions/workflows/pylint.yml)
 [![Unittests](https://github.com/weiglszonja/eeg-preprocessing/actions/workflows/testing.yml/badge.svg)](https://github.com/weiglszonja/eeg-preprocessing/actions/workflows/testing.yml)
-[![PyPI version](https://badge.fury.io/py/eeg-preprocessing.svg)](https://badge.fury.io/py/eeg-preprocessing)
+[![PyPI version](https://badge.fury.io/py/meeg-tools.svg)](https://badge.fury.io/py/meeg-tools)
 [![GitHub license](https://img.shields.io/github/license/weiglszonja/eeg-preprocessing)](https://github.com/weiglszonja/eeg-preprocessing/blob/master/LICENSE)
 
 ![Team Logo](tutorials/static/bml_équipememo.png) ![CRNL Logo](tutorials/static/crnl_logo.png)

@@ -42,16 +42,15 @@ class TestPreprocessing(unittest.TestCase):
     def test_run_autoreject(self):
         from meeg_tools.preprocessing import run_autoreject
 
-        reject_log = run_autoreject(epochs=self.epochs, subset=True)
-        epochs_autoreject = self.epochs.copy().drop(reject_log.bad_epochs,
+        reject_log = run_autoreject(epochs=self.epochs, subset=False)
+        epochs_autoreject = self.epochs.copy().drop(reject_log.report,
                                                     reason='AUTOREJECT')
 
-        assert len(epochs_autoreject) != len(self.epochs)
+        assert len(epochs_autoreject) < len(self.epochs)
 
     def test_run_ransac(self):
         from meeg_tools.preprocessing import run_ransac
 
-        epochs_ransac = run_ransac(epochs=self.epochs)
+        ransac = run_ransac(epochs=self.epochs)
 
-        assert 'EEG 001, EEG 009' in epochs_ransac.info[
-            'description']
+        assert ransac.bad_chs_ == ['EEG 001', 'EEG 009']

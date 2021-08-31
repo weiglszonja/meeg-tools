@@ -188,6 +188,7 @@ def run_ransac(epochs: Epochs, n_jobs: int = 11) -> Ransac:
         logger.info(
             f'\nRANSAC did not mark any channels to be interpolated.'
             f'You can still assess the reported channels with ransac.report')
-        ransac.report = list(report_dict.keys())
+
+    ransac.report = list(report_dict.keys())
 
     return ransac

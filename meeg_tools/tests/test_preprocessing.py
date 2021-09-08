@@ -48,9 +48,22 @@ class TestPreprocessing(unittest.TestCase):
 
         assert len(epochs_autoreject) < len(self.epochs)
 
-    def test_run_ransac(self):
-        from meeg_tools.preprocessing import run_ransac
+    def test_get_noisy_channels(self):
+        from meeg_tools.preprocessing import get_noisy_channels
 
-        ransac = run_ransac(epochs=self.epochs)
+        bads = get_noisy_channels(epochs=self.epochs, with_ransac=False)
 
-        assert ransac.bad_chs_ == ['EEG 001', 'EEG 009']
+        assert len(bads) == 9
+
+    def test_interpolate_bad_channels(self):
+        from meeg_tools.preprocessing import interpolate_bad_channels
+
+        bads = ['EEG 025', 'EEG 019']
+
+        epochs = interpolate_bad_channels(epochs=self.epochs, bads=bads)
+
+        assert 'EEG 025, EEG 019' in epochs.info['description']
+
+        epochs = interpolate_bad_channels(epochs=self.epochs, bads=[])
+
+        assert 'EEG 025, EEG 019' not in epochs.info['description']

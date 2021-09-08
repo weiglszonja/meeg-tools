@@ -3,6 +3,7 @@ PyQt5
 scipy
 pandas
 autoreject
+pyprep
 jupyter
 joblib
 sklearn

@@ -12,7 +12,7 @@ with open('requirements.txt') as f:
 
 setup_args = dict(
     name='meeg-tools',
-    version='0.2.6',
+    version='0.2.7',
     description='EEG/MEEG data preprocessing and analyses tools',
     long_description=long_description,
     long_description_content_type='text/markdown',

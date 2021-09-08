@@ -193,9 +193,11 @@ def interpolate_bad_channels(epochs: Epochs, bads: list) -> Epochs:
     epochs_interpolated = epochs.copy()
     epochs_interpolated.info['bads'] = bads
 
-    bads_str = ', '.join(bads)
-    epochs_interpolated.info.update(
-        description=epochs.info['description'] + ', interpolated: ' + bads_str)
+    if bads:
+        bads_str = ', '.join(bads)
+        description = f', interpolated: {bads_str}'
+        epochs_interpolated.info.update(
+            description=epochs.info['description'] + description)
     epochs_interpolated.interpolate_bads(reset_bads=True)
 
     return epochs_interpolated

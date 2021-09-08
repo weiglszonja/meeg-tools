@@ -1,8 +1,11 @@
 import numpy as np
 from mne import Epochs
+from mne.io import RawArray
 from mne.preprocessing import bads, ICA
 from autoreject import autoreject, Ransac
 from random import sample
+
+from pyprep import NoisyChannels
 
 from .utils.config import settings
 from mne.utils import logger
@@ -139,6 +142,63 @@ def run_autoreject(epochs: Epochs, n_jobs: int = 11,
                 f'You can assess these epochs with reject_log.report')
 
     return reject_log
+
+
+def get_noisy_channels(epochs: Epochs, with_ransac: bool = False) -> list:
+    """
+    Find bad channels using a range of methods as described in the PREP pipeline.
+    Note that low-frequency trends should be removed from the EEG signal prior
+    to bad channel detection.
+    Read the documentation for further information about the methods:
+    https://pyprep.readthedocs.io/en/latest/generated/pyprep.NoisyChannels.html#pyprep.NoisyChannels
+
+    References
+    ----------
+    Bigdely-Shamlo, N., Mullen, T., Kothe, C., Su, K. M., Robbins, K. A. (2015).
+    The PREP pipeline: standardized preprocessing for large-scale EEG analysis.
+    Frontiers in Neuroinformatics, 9, 16.
+
+    Parameters
+    ----------
+    epochs: Epochs object to use for bad channels detection
+    with_ransac: whether RANSAC should be used for bad channel detection,
+    in addition to the other methods.
+
+    Returns
+    -------
+    list of bad channels names detected
+    """
+    # transform epochs to continuous data
+    # to shape of (n_channels, n_epochs, n_times)
+    data = np.transpose(epochs.get_data(), (1, 0, 2))
+    # reshape to (n_channels, n_epochs * n_times) continuous data
+    data = data.reshape((data.shape[0], data.shape[1] * data.shape[2]))
+    # create Raw object from continuous data
+    raw = RawArray(data=data, info=epochs.info)
+
+    noisy_channels = NoisyChannels(raw=raw, do_detrend=False, random_state=42)
+    noisy_channels.find_all_bads(ransac=with_ransac)
+
+    bads = noisy_channels.get_bads(verbose=False)
+    if bads:
+        logger.info('\nNoisyChannels REPORT\n'
+                    '------------------------'
+                    f'\n{np.round(len(bads) / len(epochs.ch_names), 2) * 100}%'
+                    f' of the channels were detected as noisy.'
+                    f'\n({len(bads)}) channels: {", ".join(bads)}')
+    return bads
+
+
+def interpolate_bad_channels(epochs: Epochs, bads: list) -> Epochs:
+    epochs_interpolated = epochs.copy()
+    epochs_interpolated.info['bads'] = bads
+
+    bads_str = ', '.join(bads)
+    epochs_interpolated.info.update(
+        description=epochs.info['description'] + ', interpolated: ' + bads_str)
+    epochs_interpolated.interpolate_bads(reset_bads=True)
+
+    return epochs_interpolated
 
 
 def run_ransac(epochs: Epochs, n_jobs: int = 11) -> Ransac:

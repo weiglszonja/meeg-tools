@@ -10,4 +10,5 @@ sklearn
 matplotlib
 ipyfilechooser
 h5py
+tqdm
 #pywin32

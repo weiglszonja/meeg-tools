@@ -9,4 +9,5 @@ joblib
 sklearn
 matplotlib
 ipyfilechooser
+h5py
 #pywin32

@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 from mne import Epochs, find_events, events_from_annotations, \
-    make_fixed_length_events
+    make_fixed_length_events, merge_events
 from mne.io import Raw
 from typing import List
 
@@ -131,3 +131,30 @@ def create_metadata(epochs: Epochs):
     metadata.loc[incorrect_answers, 'answer'] = 'incorrect'
 
     return metadata
+
+
+def create_new_events_from_metadata(epochs: Epochs) -> Epochs:
+    # container for new events
+    new_events_all = [np.zeros(3)]
+
+    new_event_ids = {}
+    event_counter = 0
+    for triplet in epochs.metadata['triplet'].unique().tolist():
+        for epoch in epochs.metadata['epoch'].unique().tolist():
+            event_counter += 1
+            epochs_filt = epochs[
+                f"epoch == {int(epoch)} & triplet == '{triplet}'"]
+            old_ids = list(epochs_filt.event_id.values())
+            new_events = merge_events(events=epochs_filt.events,
+                                      ids=old_ids,
+                                      new_id=event_counter,
+                                      replace_events=True)
+            new_event_ids[f'e{int(epoch)}_{triplet}'] = int(event_counter)
+            new_events_all = np.concatenate([new_events_all, new_events],
+                                            axis=0)
+
+    new_events_all = new_events_all[1:]
+
+    epochs.event_id = new_event_ids
+    epochs.events = new_events_all
+    return epochs

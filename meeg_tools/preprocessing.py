@@ -2,7 +2,7 @@ import numpy as np
 from mne import Epochs
 from mne.io import RawArray
 from mne.preprocessing import bads, ICA
-from autoreject import autoreject, Ransac
+from autoreject import autoreject
 from random import sample
 
 from pyprep import NoisyChannels

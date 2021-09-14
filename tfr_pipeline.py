@@ -1,4 +1,5 @@
 import os
+from datetime import datetime
 from pathlib import Path
 
 import numpy as np
@@ -8,15 +9,12 @@ from meeg_tools.utils.epochs import create_new_events_from_metadata
 from meeg_tools.time_frequency import compute_power
 
 from tqdm import tqdm
-from datetime import datetime
-
 from mne.utils import logger
 
+# file path to preprocessed epochs
 epochs_path = '/Volumes/crnl-memo-hd/preprocessed/epochs_asrt'
+# postfix to lookup when collecting the files
 postfix = 'autoreject_ransac-epo.fif.gz'
-
-event_ids = {'e1_L': 1, 'e2_L': 2, 'e3_L': 3, 'e4_L': 4, 'e5_L': 5,
-             'e1_H': 6, 'e2_H': 7, 'e3_H': 8, 'e4_H': 9, 'e5_H': 10}
 
 
 def run_tfr_pipeline(source: Path, target: Path):
@@ -27,14 +25,12 @@ def run_tfr_pipeline(source: Path, target: Path):
                        f"Doing nothing ...")
         return
 
-    if not target.exists():
-        os.makedirs(target, exist_ok=False)
-
     pbar = tqdm(sorted(files))
     subjects_powers = []
     for file in pbar:
         pbar.set_description("Processing %s" % file.stem)
-        fid = '_'.join(str(file).split('_')[:3])
+        fid = '_'.join(str(file.stem.replace(' ', '_')).split('_')[:3])
+
         epochs = read_epochs(os.path.join(source, file), preload=False)
 
         if isinstance(epochs.metadata, pd.DataFrame):
@@ -52,7 +48,7 @@ def run_tfr_pipeline(source: Path, target: Path):
 
         epochs_tfr.info['fid'] = target / fid
 
-        powers = compute_power(epochs=epochs_tfr, to_hdf5=False)
+        powers = compute_power(epochs=epochs_tfr, to_hdf5=True)
         subjects_powers.append(powers[np.newaxis, ...])
 
     pbar.close()

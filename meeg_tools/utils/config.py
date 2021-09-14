@@ -7,5 +7,9 @@ tfr = dict(morlet=dict(fmin=4,
                        fmax=45,
                        step=30,
                        decim=1),
-           baseline=dict(range=(-0.2, -0.1),
-                         mode='mean'))
+           bands=dict(theta=(4.0, 8.0),
+                      alpha=(8.0, 13.0),
+                      beta=(13.0, 30.0),
+                      gamma=(30.0, 45.0)),
+           baseline=dict(range=None,
+                         mode='logratio'))

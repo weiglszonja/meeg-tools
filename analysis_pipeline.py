@@ -38,8 +38,6 @@ def run_tfr_pipeline(source: Path, target: Path):
         if analysis['filter_by']:
             if isinstance(epochs.metadata, pd.DataFrame):
                 epochs.metadata = epochs.metadata.astype(str)
-                # make sure to analyze only correct trials
-                epochs = epochs["answer == 'correct'"]
                 if all(condition in epochs.metadata.columns for condition in analysis['filter_by']):
                     for meta_ind, _ in epochs.metadata.groupby(analysis['filter_by']):
                         query_str = ' & '.join([f'{a} == "{b}"' for a, b in zip(analysis['filter_by'], meta_ind)])

@@ -14,6 +14,7 @@ setup_args = dict(
     name='meeg-tools',
     version='0.2.7',
     description='EEG/MEEG data preprocessing and analyses tools',
+    python_requires='<3.10.1',
     long_description=long_description,
     long_description_content_type='text/markdown',
     author='Szonja Weigl',

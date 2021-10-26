@@ -51,3 +51,36 @@ def save_to_hdf5(power: AverageTFR):
     logger.info(f'Saving power at {file_path_with_extension} ...')
     power.save(fname=str(file_path_with_extension), overwrite=True)
     logger.info('[FINISHED]')
+
+
+def average_power_into_frequency_bands(power: AverageTFR) -> AverageTFR:
+    """
+    Computes average power in specific frequency ranges defined in config.py.
+    Parameters
+    ----------
+    power
+
+    Returns
+    -------
+
+    """
+    bands = analysis['bands'].values()
+
+    band_power_data_arr = []
+    for band in bands:
+        band_filter = np.logical_and(power.freqs >= float(band[0]), power.freqs < float(band[1]))
+        if int(max(power.freqs)) == int(max(bands)[1]):
+            band_filter[-1] = True
+        band_data = power.data[:, band_filter, :].mean(axis=1)
+        band_power_data_arr.append(band_data[np.newaxis, :])
+
+    band_power_data = np.concatenate(band_power_data_arr, axis=0)
+    band_power_data = np.transpose(band_power_data, (1, 0, 2))
+
+    band_freqs = np.asarray([band[0] for band in bands])
+
+    band_power = power.copy()
+    band_power.data = band_power_data
+    band_power.freqs = band_freqs
+
+    return band_power

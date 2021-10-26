@@ -9,12 +9,10 @@ from mne.utils import logger
 from .utils.config import analysis
 
 
-def compute_power(epochs: Epochs) -> AverageTFR:
+def compute_power(epochs: Epochs):
     """
     Computes Time-Frequency Representation (TFR) using complex Morlet wavelets
-    averaged over epochs.
-    Returns an AverageTFR object with a shape of (n_channels, n_frequencies, n_times).
-    Power is written to an HDF5 file.
+    averaged over epochs. Power is written to an HDF5 file.
     Parameters
     ----------
     epochs

@@ -1,4 +1,6 @@
 import os
+import re
+
 import numpy as np
 from mne import Epochs
 from mne.time_frequency import tfr_morlet, AverageTFR
@@ -41,6 +43,11 @@ def save_to_hdf5(power: AverageTFR):
         os.makedirs(power.info["fid"].parent)
 
     power.info["fid"] = str(power.info["fid"])
+    # replace floats in file name with integers
+    floats = re.findall("[-+]?\d*\.\d+", power.info["fid"])
+    if floats:
+        for num in floats:
+            power.info["fid"] = power.info["fid"].replace(num, str(int(float(num))))
     file_path_with_extension = f'{power.info["fid"]}_{analysis["method"]}-tfr.h5'
 
     logger.info(f'Saving power at {file_path_with_extension} ...')

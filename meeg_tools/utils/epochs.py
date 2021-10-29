@@ -1,7 +1,8 @@
 import numpy as np
 import pandas as pd
 from mne import Epochs, find_events, events_from_annotations, \
-    make_fixed_length_events, merge_events
+    make_fixed_length_events, merge_events, concatenate_epochs
+from mne.epochs import combine_event_ids
 from mne.io import Raw
 from typing import List
 
@@ -78,6 +79,25 @@ def create_epochs(raw: Raw) -> Epochs:
                     preload=False)
 
     return epochs
+
+
+def create_epochs_from_intervals(raw: Raw, intervals: List[tuple]) -> Epochs:
+    events, _ = events_from_annotations(raw)
+
+    epochs_list = []
+    for interval in intervals:
+        start_idx = np.where(events[..., 2] == interval[0])[0]
+        end_idx = np.where(events[..., 2] == interval[1])[0]
+
+        raw_cropped = raw.copy().crop(tmin=events[start_idx[0]][0] / raw.info['sfreq'],
+                                      tmax=events[end_idx[0]][0] / raw.info['sfreq'])
+
+        epochs = create_epochs(raw_cropped)
+        combine_event_ids(epochs, list(epochs.event_id.keys()), interval[0], copy=False)
+
+        epochs_list.append(epochs)
+
+    return concatenate_epochs(epochs_list)
 
 
 def create_metadata(epochs: Epochs):

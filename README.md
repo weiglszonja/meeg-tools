@@ -61,7 +61,7 @@ EEG/MEG data without removing meaningful signals in the process. Here, we
 present a semiautomatic pipeline which can prepare the data for functional
 connectivity or event related potential (ERP) analyses.
 
-The eeg-preprocessing package aims to serve as a semiautomatic and reproducible
+The meeg-tools package aims to serve as a semiautomatic and reproducible
 framework for preprocessing EEG/MEG signals prior to time-frequency-based
 analyses. It minimizes the manual steps required to clean the data based on
 visual inspection and reduces the number of choices that depend on the

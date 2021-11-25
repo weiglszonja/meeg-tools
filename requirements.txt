@@ -12,3 +12,4 @@ ipyfilechooser
 h5py
 tqdm
 #pywin32
+python-picard

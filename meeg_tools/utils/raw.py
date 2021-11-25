@@ -34,7 +34,7 @@ def read_raw_measurement(raw_file_path: str, **kwargs):
 
     # Session parameters
     raw_id = raw_file_path.stem
-    raw.info.update(fid=raw_id)
+    raw.info.update(temp=raw_id)
 
     if not bool(raw.get_montage()):
         logger.info(f'Channel locations are missing from the file')

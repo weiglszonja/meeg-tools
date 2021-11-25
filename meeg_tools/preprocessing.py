@@ -55,7 +55,7 @@ def prepare_epochs_for_ica(epochs: Epochs) -> Epochs:
     return epochs_faster
 
 
-def run_ica(epochs: Epochs) -> ICA:
+def run_ica(epochs: Epochs, fit_params: dict = None) -> ICA:
     """
     Runs ICA decomposition on Epochs instance.
 
@@ -65,13 +65,15 @@ def run_ica(epochs: Epochs) -> ICA:
     Parameters
     ----------
     epochs: the instance to be used for ICA decomposition
+    fit_params: parameters to be passed to ICA fit (e.g. orthogonal picard, extended infomax)
     Returns
     -------
     ICA instance
     """
     ica = ICA(n_components=settings['ica']['n_components'],
               random_state=42,
-              method=settings['ica']['method'])
+              method=settings['ica']['method'],
+              fit_params=fit_params)
     ica_epochs = epochs.copy()
     ica.fit(ica_epochs, decim=settings['ica']['decim'])
 
@@ -88,6 +90,27 @@ def run_ica(epochs: Epochs) -> ICA:
     ica.exclude = eog_indices
 
     return ica
+
+
+def apply_ica(epochs: Epochs, ica: ICA) -> Epochs:
+    """
+    Applies ICA on Epochs instance.
+    Parameters
+    ----------
+    epochs
+    ica
+
+    Returns
+    -------
+
+    """
+    ica_epochs = epochs.copy().load_data()
+    ica.apply(ica_epochs)
+
+    ica_epochs.info.update(description=f'n_components: {len(ica.exclude)}')
+    ica_epochs.info.update(temp=f'{epochs.info["temp"]}_ICA')
+
+    return ica_epochs
 
 
 def run_autoreject(epochs: Epochs, n_jobs: int = 11,

@@ -14,3 +14,4 @@ h5py
 tqdm
 #pywin32
 pyyaml~=6.0
+yasa

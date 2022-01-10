@@ -85,3 +85,22 @@ def average_power_into_frequency_bands(power: AverageTFR, config: dict) -> Avera
     band_power.comment = power.comment + '_band_average'
 
     return band_power
+
+
+def compute_power_irasa_method(epochs: Epochs, bands: tuple):
+    from yasa import irasa
+
+    # transform epochs to continuous data
+    # to shape of (n_channels, n_epochs, n_times)
+    data = np.transpose(epochs.get_data(), (1, 0, 2))
+    # reshape to (n_channels, n_epochs * n_times) continuous data
+    data = data.reshape((data.shape[0], data.shape[1] * data.shape[2]))
+
+    freqs, psd_aperiodic, psd_oscillatory = irasa(data=data,
+                                                  sf=epochs.info['sfreq'],
+                                                  ch_names=epochs.info['ch_names'],
+                                                  band=bands,
+                                                  return_fit=False,
+                                                  win_sec=2 * (1 / bands[0]))
+
+    return freqs, psd_oscillatory

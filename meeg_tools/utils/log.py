@@ -1,8 +1,11 @@
 import os
 from datetime import datetime
+
 import numpy as np
 import pandas as pd
+
 from mne import Epochs
+from mne.utils import logger
 
 
 def update_log(log_file_path: str, epochs: Epochs, notes: str) -> pd.DataFrame:
@@ -21,7 +24,7 @@ def update_log(log_file_path: str, epochs: Epochs, notes: str) -> pd.DataFrame:
     ----------
     log data
     """
-    fid = epochs.info['fid']
+    fid = epochs.info['temp']
     dropped_epochs_marker = ['FASTER', 'USER', 'AUTOREJECT']
     n_bad_epochs = len([drop for drop in epochs.drop_log if
                         np.isin(dropped_epochs_marker, drop).any()])
@@ -45,6 +48,13 @@ def update_log(log_file_path: str, epochs: Epochs, notes: str) -> pd.DataFrame:
                         'date_of_update': [datetime.utcnow().isoformat()]})
 
     description = epochs.info['description']
+
+    if description is None:
+        logger.warning('Failed to update parameters from epochs.info["description"], \n'
+                       'Returning log object, consider adding description field manually and rerunning this function.\n'
+                       'Formatting should match this format: "n_components: 1, interpolated: AF7, Fp2, P3, CP5, Fp1"')
+        return log
+
     if 'n_components' in description:
         n_components = [x for x in description.split(',')[0] if x.isdigit()][0]
         log['n_components'].update(int(n_components))

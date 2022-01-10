@@ -39,14 +39,6 @@ $ cd meeg-tools
 $ pip install -e .
 ```
 
-Alternatively, you can install it in a new virtual environment with conda:
-
-```bash
-$ git clone https://github.com/weiglszonja/meeg-tools.git
-$ conda env create -f meeg-tools/make_conda_env.yml
-$ source activate meeg_tools
-```
-
 ## Background
 
 ### Preprocessing

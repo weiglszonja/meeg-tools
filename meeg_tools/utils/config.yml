@@ -1,0 +1,26 @@
+analysis:
+    overwrite: yes
+    picks: eeg
+    mode: power
+    bands:
+        theta:
+            - 4.0
+            - 8.0
+        alpha:
+            - 8.0
+            - 13.0
+        beta:
+            - 13.0
+            - 30.0
+        gamma:
+            - 30.0
+            - 45.0
+    conditions:
+        - triplet
+power:
+    is_evoked: yes
+    morlet:
+        fmin: 4
+        fmax: 45
+        step: 30
+        decim: 1

@@ -18,6 +18,14 @@ EPOCHS_FILE_POSTFIX = "autoreject_ransac-epo.fif.gz"
 
 
 def run_tfr_pipeline(source: Path, target: Path, conf: dict):
+    def _run_tfr(epochs_tfr):
+        if mode == "power":
+            power = compute_power(epochs=epochs_tfr, config=conf["power"])
+            power.comment = file_path
+            save_to_hdf5(power=power)
+        else:
+            pass
+
     files = sorted(list(source.rglob(f"*{EPOCHS_FILE_POSTFIX}")))
 
     if not len(files):
@@ -54,51 +62,40 @@ def run_tfr_pipeline(source: Path, target: Path, conf: dict):
 
                         file_name = f"{fid}_{'_'.join(condition_values)}"
                         file_path = target / file_name
-                        if _file_exists(file_path=f"{file_path}_{mode}-tfr.h5"):
+                        if file_exists(file_path=f"{file_path}_{mode}-tfr.h5"):
                             pbar.update(1)
                             continue
 
-                        if mode == "power":
-                            evoked_power = compute_power(epochs=epochs_query,
-                                                         config=conf["power"])
-                            evoked_power.comment = file_path
-                            save_to_hdf5(power=evoked_power)
-
+                        _run_tfr(epochs_tfr=epochs_query)
 
         else:
             file_path = target / fid
-            if _file_exists(f'{file_path}_{conf["analysis"]["mode"]}-tfr.h5'):
+            if file_exists(f'{file_path}_{conf["analysis"]["mode"]}-tfr.h5'):
                 pbar.update(1)
                 continue
 
-            if mode == "power":
-                induced_power = compute_power(epochs=epochs, config=conf["power"])
-                induced_power.comment = file_path
-                save_to_hdf5(power=induced_power)
+            _run_tfr(epochs_tfr=epochs)
 
     pbar.close()
 
 
-def _read_config(file_name: str):
+def read_config(file_name: str):
+    cfg = {}
     if os.path.exists(file_name):
         with open(file_name, "r") as config_file:
             cfg = yaml.safe_load(config_file)
-        return cfg
-
     else:
         logger.error(f"Configuration file ({file_name}) does not exist!")
+    return cfg
 
 
-def _file_exists(file_path: str) -> bool:
-    if config["analysis"]["overwrite"]:
-        return os.path.exists(file_path) and not config["analysis"]["overwrite"]
-    else:
-        return False
+def file_exists(file_path: str) -> bool:
+    return os.path.exists(file_path) and not config["analysis"]["overwrite"]
 
 
 if __name__ == "__main__":
     logger.info(f"\nReading configuration from {CONFIGURATION_FILE_PATH} file ...\n")
-    config = _read_config(CONFIGURATION_FILE_PATH)
+    config = read_config(CONFIGURATION_FILE_PATH)
     logger.info(yaml.dump(config))
     logger.info(
         f'\nRunning EEG/MEG {config["analysis"]["mode"]} analysis pipeline for '

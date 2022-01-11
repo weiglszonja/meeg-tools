@@ -1,5 +1,12 @@
+"""
+This module contains functions that can be used to perform connectivity analysis
+in the sensor space using MNE-Python.
+https://mne.tools/mne-connectivity/stable/generated/mne_connectivity.spectral_connectivity.html
+https://mne.tools/mne-connectivity/stable/auto_examples/sensor_connectivity.html#sphx-glr-auto-examples-sensor-connectivity-py
+"""
 import numpy as np
 from matplotlib import pyplot as plt
+
 from mne import Epochs
 from mne.connectivity import spectral_connectivity
 from mne.preprocessing import compute_current_source_density
@@ -24,23 +31,26 @@ def compute_connectivity(epochs: Epochs, **kwargs) -> np.ndarray:
     https://docs.scipy.org/doc/numpy/reference/generated/numpy.fft.rfftfreq.html
     """
     # spacing between frequency bins
-    spacing = epochs.info['sfreq'] / epochs.get_data().shape[-1]
+    spacing = epochs.info["sfreq"] / epochs.get_data().shape[-1]
 
-    low_cutoff = tuple(band[0] for band in kwargs['freqs'])
+    low_cutoff = tuple(band[0] for band in kwargs["freqs"])
     high_cutoff = tuple(
-        band[1] - spacing if band != max(kwargs['freqs']) else band[1] for band
-        in kwargs['freqs'])
+        band[1] - spacing if band != max(kwargs["freqs"]) else band[1]
+        for band in kwargs["freqs"]
+    )
 
     epochs_csd = compute_surface_laplacian(epochs=epochs, verbose=False)
-    con, _, _, _, _ = spectral_connectivity(data=epochs_csd,
-                                            method=kwargs['method'],
-                                            sfreq=epochs.info['sfreq'],
-                                            mode=kwargs['mode'],
-                                            fmin=low_cutoff,
-                                            fmax=high_cutoff,
-                                            faverage=kwargs['faverage'],
-                                            n_jobs=kwargs['n_jobs'],
-                                            verbose=True)
+    con, _, _, _, _ = spectral_connectivity(
+        data=epochs_csd,
+        method=kwargs["method"],
+        sfreq=epochs.info["sfreq"],
+        mode=kwargs["mode"],
+        fmin=low_cutoff,
+        fmax=high_cutoff,
+        faverage=kwargs["faverage"],
+        n_jobs=kwargs["n_jobs"],
+        verbose=True,
+    )
 
     # from shape of (n_signals, n_signals, n_freqs) to
     # (n_freqs, n_signals, n_signals)
@@ -72,14 +82,12 @@ def compute_surface_laplacian(epochs: Epochs, verbose: bool = True) -> Epochs:
     epochs_csd = compute_current_source_density(epochs.copy())
 
     if verbose:
-        fig, ax = plt.subplots(nrows=2,
-                               ncols=1,
-                               sharex='all',
-                               sharey='all',
-                               dpi=220)
+        fig, axes_subplot = plt.subplots(
+            nrows=2, ncols=1, sharex="all", sharey="all", dpi=220
+        )
 
-        epochs.plot_psd(ax=ax[0], show=False, fmax=60)
-        epochs_csd.plot_psd(ax=ax[1], show=False, fmax=60)
-        plt.show()
+        epochs.plot_psd(ax=axes_subplot[0], show=False, fmax=60)
+        epochs_csd.plot_psd(ax=axes_subplot[1], show=False, fmax=60)
+        fig.show()
 
     return epochs_csd

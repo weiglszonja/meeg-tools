@@ -2,9 +2,9 @@ from pathlib import Path
 
 from mne.channels import read_custom_montage
 from mne.io import read_raw, read_raw_edf, Raw
+from mne.utils import logger
 
 from .config import settings
-from mne.utils import logger
 
 
 def read_raw_measurement(raw_file_path: str, **kwargs):
@@ -25,10 +25,10 @@ def read_raw_measurement(raw_file_path: str, **kwargs):
     try:
         raw = read_raw(str(raw_file_path), preload=False, verbose=True)
     except Exception as e:
-        if '.edf' in str(e):
+        if ".edf" in str(e):
             raw = read_raw_edf(str(raw_file_path), preload=False, verbose=True)
         else:
-            logger.error(f'Unsupported file type ({extension})')
+            logger.error(f"Unsupported file type ({extension})")
 
             return
 
@@ -37,12 +37,12 @@ def read_raw_measurement(raw_file_path: str, **kwargs):
     raw.info.update(temp=raw_id)
 
     if not bool(raw.get_montage()):
-        logger.info(f'Channel locations are missing from the file')
+        logger.info(f"Channel locations are missing from the file")
         try:
-            path_to_locs = kwargs['locs_file_path']
-            raw = set_raw_montage_from_locs(raw=raw,
-                                            path_to_locs=path_to_locs,
-                                            show_montage=False)
+            path_to_locs = kwargs["locs_file_path"]
+            raw = set_raw_montage_from_locs(
+                raw=raw, path_to_locs=path_to_locs, show_montage=False
+            )
         except Exception as e:
             logger.error(e)
             return raw
@@ -50,9 +50,10 @@ def read_raw_measurement(raw_file_path: str, **kwargs):
     return raw
 
 
-def set_raw_montage_from_locs(raw: Raw, path_to_locs: str,
-                              show_montage: False = bool) -> Raw:
-    '''
+def set_raw_montage_from_locs(
+    raw: Raw, path_to_locs: str, show_montage: False = bool
+) -> Raw:
+    """
     Reads channels locations from a file and applies them to Raw instance.
     Parameters
     ----------
@@ -64,31 +65,38 @@ def set_raw_montage_from_locs(raw: Raw, path_to_locs: str,
     Returns
     -------
     Raw instance
-    '''
+    """
     if Path(path_to_locs).exists():
         montage = read_custom_montage(path_to_locs)
 
         # check if there are any channels not in raw instance
-        missing_channel_locations = [ch_name for ch_name in raw.ch_names if
-                                     ch_name not in montage.ch_names]
+        missing_channel_locations = [
+            ch_name for ch_name in raw.ch_names if ch_name not in montage.ch_names
+        ]
         if missing_channel_locations:
-            logger.info(f'There are {len(missing_channel_locations)} channel '
-                        f'positions not present in the '
-                        f'{Path(path_to_locs).stem} file.')
-            logger.info(f'Assuming these ({missing_channel_locations}) '
-                        f'are not EEG channels, dropping them from Raw.')
+            logger.info(
+                f"There are {len(missing_channel_locations)} channel "
+                f"positions not present in the "
+                f"{Path(path_to_locs).stem} file."
+            )
+            logger.info(
+                f"Assuming these ({missing_channel_locations}) "
+                f"are not EEG channels, dropping them from Raw."
+            )
 
             raw.drop_channels(missing_channel_locations)
 
-        logger.info('Applying channel locations to Raw instance.')
+        logger.info("Applying channel locations to Raw instance.")
         raw.set_montage(montage)
 
         if show_montage:
             raw.plot_sensors(show_names=True)
 
     else:
-        logger.warning(f'Montage file {path_to_locs} path does not exist! '
-                       f'Returning unmodified raw.')
+        logger.warning(
+            f"Montage file {path_to_locs} path does not exist! "
+            f"Returning unmodified raw."
+        )
 
     return raw
 
@@ -105,10 +113,15 @@ def filter_raw(raw: Raw, **kwargs) -> Raw:
     -------
     Raw instance
     """
-    raw_bandpass = raw.load_data().copy().filter(
-        l_freq=settings['bandpass_filter']['low_freq'],
-        h_freq=settings['bandpass_filter']['high_freq'],
-        n_jobs=8,
-        **kwargs)
+    raw_bandpass = (
+        raw.load_data()
+        .copy()
+        .filter(
+            l_freq=settings["bandpass_filter"]["low_freq"],
+            h_freq=settings["bandpass_filter"]["high_freq"],
+            n_jobs=8,
+            **kwargs,
+        )
+    )
 
     return raw_bandpass

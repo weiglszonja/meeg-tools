@@ -1,6 +1,6 @@
 [![Paper](https://github.com/weiglszonja/eeg-preprocessing/actions/workflows/paper.yml/badge.svg)](https://github.com/weiglszonja/eeg-preprocessing/actions/workflows/paper.yml)
-[![Pylint](https://github.com/weiglszonja/meeg-tools/actions/workflows/pylint.yml/badge.svg)](https://github.com/weiglszonja/meeg-tools/actions/workflows/pylint.yml)
-[![Black](https://github.com/weiglszonja/meeg-tools/actions/workflows/black.yml/badge.svg)](https://github.com/weiglszonja/meeg-tools/actions/workflows/black.yml)
+[![code-quality](https://github.com/weiglszonja/meeg-tools/actions/workflows/pylint.yml/badge.svg)](https://github.com/weiglszonja/meeg-tools/actions/workflows/pylint.yml)
+[![code-formatter](https://github.com/weiglszonja/meeg-tools/actions/workflows/black.yml/badge.svg)](https://github.com/weiglszonja/meeg-tools/actions/workflows/black.yml)
 [![Unittests](https://github.com/weiglszonja/eeg-preprocessing/actions/workflows/testing.yml/badge.svg)](https://github.com/weiglszonja/eeg-preprocessing/actions/workflows/testing.yml)
 [![PyPI version](https://badge.fury.io/py/meeg-tools.svg)](https://badge.fury.io/py/meeg-tools)
 [![GitHub license](https://img.shields.io/github/license/weiglszonja/eeg-preprocessing)](https://github.com/weiglszonja/eeg-preprocessing/blob/master/LICENSE)

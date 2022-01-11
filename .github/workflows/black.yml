@@ -1,4 +1,4 @@
-name: Black
+name: code-formatter
 on: [push, pull_request]
 jobs:
   linter_name:

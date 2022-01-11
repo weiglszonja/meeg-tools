@@ -1,3 +1,6 @@
+"""
+This module contains functions to perform time-frequency analysis on EEG/MEG dataset.
+"""
 import os
 from pathlib import Path
 

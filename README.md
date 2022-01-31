@@ -1,5 +1,6 @@
 [![Paper](https://github.com/weiglszonja/eeg-preprocessing/actions/workflows/paper.yml/badge.svg)](https://github.com/weiglszonja/eeg-preprocessing/actions/workflows/paper.yml)
-[![flake8](https://github.com/weiglszonja/eeg-preprocessing/actions/workflows/pylint.yml/badge.svg)](https://github.com/weiglszonja/eeg-preprocessing/actions/workflows/pylint.yml)
+[![code-quality](https://github.com/weiglszonja/meeg-tools/actions/workflows/pylint.yml/badge.svg)](https://github.com/weiglszonja/meeg-tools/actions/workflows/pylint.yml)
+[![code-formatter](https://github.com/weiglszonja/meeg-tools/actions/workflows/black.yml/badge.svg)](https://github.com/weiglszonja/meeg-tools/actions/workflows/black.yml)
 [![Unittests](https://github.com/weiglszonja/eeg-preprocessing/actions/workflows/testing.yml/badge.svg)](https://github.com/weiglszonja/eeg-preprocessing/actions/workflows/testing.yml)
 [![PyPI version](https://badge.fury.io/py/meeg-tools.svg)](https://badge.fury.io/py/meeg-tools)
 [![GitHub license](https://img.shields.io/github/license/weiglszonja/eeg-preprocessing)](https://github.com/weiglszonja/eeg-preprocessing/blob/master/LICENSE)
@@ -53,7 +54,7 @@ EEG/MEG data without removing meaningful signals in the process. Here, we
 present a semiautomatic pipeline which can prepare the data for functional
 connectivity or event related potential (ERP) analyses.
 
-The eeg-preprocessing package aims to serve as a semiautomatic and reproducible
+The meeg-tools package aims to serve as a semiautomatic and reproducible
 framework for preprocessing EEG/MEG signals prior to time-frequency-based
 analyses. It minimizes the manual steps required to clean the data based on
 visual inspection and reduces the number of choices that depend on the

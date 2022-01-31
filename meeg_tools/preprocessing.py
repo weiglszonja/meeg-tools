@@ -1,14 +1,18 @@
+"""
+This module contains functions that can be used to clean EEG/MEG data using MNE-Python.
+https://github.com/weiglszonja/meeg-tools/blob/master/README.md
+"""
+from random import sample
 import numpy as np
+
 from mne import Epochs
 from mne.io import RawArray
 from mne.preprocessing import bads, ICA
+from mne.utils import logger
 from autoreject import autoreject
-from random import sample
-
 from pyprep import NoisyChannels
 
 from .utils.config import settings
-from mne.utils import logger
 
 
 def prepare_epochs_for_ica(epochs: Epochs) -> Epochs:
@@ -25,7 +29,7 @@ def prepare_epochs_for_ica(epochs: Epochs) -> Epochs:
     -------
     Epochs instance
     """
-    logger.info('Preliminary epoch rejection: ')
+    logger.info("Preliminary epoch rejection: ")
 
     def _deviation(data: np.ndarray) -> np.ndarray:
         """
@@ -35,9 +39,9 @@ def prepare_epochs_for_ica(epochs: Epochs) -> Epochs:
         return channels_mean - np.mean(channels_mean, axis=0)
 
     metrics = {
-        'amplitude': lambda x: np.mean(np.ptp(x, axis=2), axis=1),
-        'deviation': lambda x: np.mean(_deviation(x), axis=1),
-        'variance': lambda x: np.mean(np.var(x, axis=2), axis=1),
+        "amplitude": lambda x: np.mean(np.ptp(x, axis=2), axis=1),
+        "deviation": lambda x: np.mean(_deviation(x), axis=1),
+        "variance": lambda x: np.mean(np.var(x, axis=2), axis=1),
     }
 
     epochs_data = epochs.get_data()
@@ -46,11 +50,11 @@ def prepare_epochs_for_ica(epochs: Epochs) -> Epochs:
     for metric in metrics:
         scores = metrics[metric](epochs_data)
         outliers = bads._find_outliers(scores, threshold=3.0)
-        logger.info(f'Bad epochs by {metric}\n\t{outliers}')
+        logger.info(f"Bad epochs by {metric}\n\t{outliers}")
         bad_epochs.extend(outliers)
 
     bad_epochs = list(set(bad_epochs))
-    epochs_faster = epochs.copy().drop(bad_epochs, reason='FASTER')
+    epochs_faster = epochs.copy().drop(bad_epochs, reason="FASTER")
 
     return epochs_faster
 
@@ -70,21 +74,25 @@ def run_ica(epochs: Epochs, fit_params: dict = None) -> ICA:
     -------
     ICA instance
     """
-    ica = ICA(n_components=settings['ica']['n_components'],
-              random_state=42,
-              method=settings['ica']['method'],
-              fit_params=fit_params)
+    ica = ICA(
+        n_components=settings["ica"]["n_components"],
+        random_state=42,
+        method=settings["ica"]["method"],
+        fit_params=fit_params,
+    )
     ica_epochs = epochs.copy()
-    ica.fit(ica_epochs, decim=settings['ica']['decim'])
+    ica.fit(ica_epochs, decim=settings["ica"]["decim"])
 
-    if 'eog' not in epochs.get_channel_types():
-        if 'Fp1' and 'Fp2' in epochs.get_montage().ch_names:
-            eog_channels = ['Fp1', 'Fp2']
+    if "eog" not in epochs.get_channel_types():
+        if "Fp1" and "Fp2" in epochs.get_montage().ch_names:
+            eog_channels = ["Fp1", "Fp2"]
         else:
             eog_channels = epochs.get_montage().ch_names[:2]
-        logger.info('EOG channels are not found. Attempting to use '
-                    f'{",".join(eog_channels)} channels as EOG channels.')
-        ica_epochs.set_channel_types({ch: 'eog' for ch in eog_channels})
+        logger.info(
+            "EOG channels are not found. Attempting to use "
+            f'{",".join(eog_channels)} channels as EOG channels.'
+        )
+        ica_epochs.set_channel_types({ch: "eog" for ch in eog_channels})
 
     eog_indices, _ = ica.find_bads_eog(ica_epochs)
     ica.exclude = eog_indices
@@ -107,14 +115,15 @@ def apply_ica(epochs: Epochs, ica: ICA) -> Epochs:
     ica_epochs = epochs.copy().load_data()
     ica.apply(ica_epochs)
 
-    ica_epochs.info.update(description=f'n_components: {len(ica.exclude)}')
+    ica_epochs.info.update(description=f"n_components: {len(ica.exclude)}")
     ica_epochs.info.update(temp=f'{epochs.info["temp"]}_ICA')
 
     return ica_epochs
 
 
-def run_autoreject(epochs: Epochs, n_jobs: int = 11,
-                   subset: bool = False) -> autoreject.RejectLog:
+def run_autoreject(
+    epochs: Epochs, n_jobs: int = 11, subset: bool = False
+) -> autoreject.RejectLog:
     """
     Drop bad epochs based on AutoReject.
     Parameters
@@ -136,33 +145,37 @@ def run_autoreject(epochs: Epochs, n_jobs: int = 11,
 
     n_epochs = len(epochs_autoreject)
     if subset:
-        logger.info(f'Fitting autoreject on random (n={int(n_epochs * 0.25)}) '
-                    f'subset of epochs: ')
+        logger.info(
+            f"Fitting autoreject on random (n={int(n_epochs * 0.25)}) "
+            f"subset of epochs: "
+        )
         subset = sample(set(np.arange(0, n_epochs, 1)), int(n_epochs * 0.25))
         ar.fit(epochs_autoreject[subset])
 
     else:
-        logger.info(f'Fitting autoreject on (n={n_epochs}) epochs: ')
+        logger.info(f"Fitting autoreject on (n={n_epochs}) epochs: ")
         ar.fit(epochs_autoreject)
 
     reject_log = ar.get_reject_log(epochs_autoreject)
 
     # report bad epochs where more than 15% (value updated from config.py)
     # of channels were marked as noisy within an epoch
-    threshold = settings['autoreject']['threshold']
+    threshold = settings["autoreject"]["threshold"]
     num_bad_epochs = np.count_nonzero(reject_log.labels, axis=1)
-    bad_epochs = np.where(num_bad_epochs > threshold * epochs.info['nchan'])
+    bad_epochs = np.where(num_bad_epochs > threshold * epochs.info["nchan"])
     bad_epochs = bad_epochs[0].tolist()
 
     reject_log.report = bad_epochs
 
-    logger.info('\nAUTOREJECT report\n'
-                f'There are {len(epochs_autoreject[reject_log.bad_epochs])} '
-                f'bad epochs found with Autoreject. '
-                f'You can assess these epochs with reject_log.bad_epochs\n'
-                f'\nThere are {len(bad_epochs)} bad epochs where more than '
-                f'{int(threshold * 100)}% of the channels were noisy. '
-                f'You can assess these epochs with reject_log.report')
+    logger.info(
+        "\nAUTOREJECT report\n"
+        f"There are {len(epochs_autoreject[reject_log.bad_epochs])} "
+        f"bad epochs found with Autoreject. "
+        f"You can assess these epochs with reject_log.bad_epochs\n"
+        f"\nThere are {len(bad_epochs)} bad epochs where more than "
+        f"{int(threshold * 100)}% of the channels were noisy. "
+        f"You can assess these epochs with reject_log.report"
+    )
 
     return reject_log
 
@@ -204,23 +217,26 @@ def get_noisy_channels(epochs: Epochs, with_ransac: bool = False) -> list:
 
     bads = noisy_channels.get_bads(verbose=False)
     if bads:
-        logger.info('\nNoisyChannels REPORT\n'
-                    '------------------------'
-                    f'\n{np.round(len(bads) / len(epochs.ch_names), 2) * 100}%'
-                    f' of the channels were detected as noisy.'
-                    f'\n({len(bads)}) channels: {", ".join(bads)}')
+        logger.info(
+            "\nNoisyChannels REPORT\n"
+            "------------------------"
+            f"\n{np.round(len(bads) / len(epochs.ch_names), 2) * 100}%"
+            f" of the channels were detected as noisy."
+            f'\n({len(bads)}) channels: {", ".join(bads)}'
+        )
     return bads
 
 
 def interpolate_bad_channels(epochs: Epochs, bads: list) -> Epochs:
     epochs_interpolated = epochs.copy()
-    epochs_interpolated.info['bads'] = bads
+    epochs_interpolated.info["bads"] = bads
 
     if bads:
-        bads_str = ', '.join(bads)
-        description = f', interpolated: {bads_str}'
+        bads_str = ", ".join(bads)
+        description = f", interpolated: {bads_str}"
         epochs_interpolated.info.update(
-            description=epochs.info['description'] + description)
+            description=epochs.info["description"] + description
+        )
     epochs_interpolated.interpolate_bads(reset_bads=True)
 
     return epochs_interpolated

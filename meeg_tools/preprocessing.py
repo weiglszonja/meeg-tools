@@ -125,7 +125,7 @@ def run_autoreject(
     epochs: Epochs, n_jobs: int = 11, subset: bool = False
 ) -> autoreject.RejectLog:
     """
-    Drop bad epochs based on AutoReject.
+    Finds bad epochs based on AutoReject.
     Parameters
     ----------
     epochs: the instance to be cleaned
@@ -180,6 +180,24 @@ def run_autoreject(
     return reject_log
 
 
+def apply_autoreject(epochs: Epochs, reject_log: autoreject.RejectLog) -> Epochs:
+    """
+    Drop bad epochs based on AutoReject.
+    Parameters
+    ----------
+    epochs
+    reject_log
+
+    Returns
+    -------
+
+    """
+    epochs_autoreject = epochs.copy().drop(reject_log.report, reason="AUTOREJECT")
+    epochs_autoreject.info.update(temp=f'{epochs.info["temp"]}_ransac')
+
+    return epochs_autoreject
+
+
 def get_noisy_channels(epochs: Epochs, with_ransac: bool = False) -> list:
     """
     Find bad channels using a range of methods as described in the PREP pipeline.
@@ -228,7 +246,22 @@ def get_noisy_channels(epochs: Epochs, with_ransac: bool = False) -> list:
 
 
 def interpolate_bad_channels(epochs: Epochs, bads: list) -> Epochs:
-    epochs_interpolated = epochs.copy()
+    """
+    Interpolates channels in an Epochs instance based on a list of channel names.
+    Parameters
+    ----------
+    epochs
+    bads
+
+    Returns
+    -------
+
+    """
+    if not epochs.preload:
+        epochs_interpolated = epochs.copy().load_data()
+    else:
+        epochs_interpolated = epochs.copy()
+
     epochs_interpolated.info["bads"] = bads
 
     if bads:
@@ -237,6 +270,7 @@ def interpolate_bad_channels(epochs: Epochs, bads: list) -> Epochs:
         epochs_interpolated.info.update(
             description=epochs.info["description"] + description
         )
-    epochs_interpolated.interpolate_bads(reset_bads=True)
 
+    epochs_interpolated.interpolate_bads(reset_bads=True)
+    epochs_interpolated.info.update(temp=f'{epochs.info["temp"]}_ransac')
     return epochs_interpolated

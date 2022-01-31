@@ -112,6 +112,16 @@ def create_epochs_from_intervals(raw: Raw, intervals: List[tuple]) -> Epochs:
 
 
 def create_metadata(epochs: Epochs):
+    """
+    Custom function that adds metadata to Epochs instance.
+    Parameters
+    ----------
+    epochs
+
+    Returns
+    -------
+
+    """
     metadata = pd.DataFrame(
         data=epochs.events, columns=["time_in_samples", "stim", "id"]
     )

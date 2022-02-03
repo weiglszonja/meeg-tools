@@ -194,7 +194,7 @@ def apply_autoreject(epochs: Epochs, reject_log: autoreject.RejectLog) -> Epochs
     """
     epochs_autoreject = epochs.copy().drop(reject_log.report,
                                            reason='AUTOREJECT')
-    epochs_autoreject.info.update(temp=f'{epochs.info["temp"]}_ransac')
+    epochs_autoreject.info.update(temp=f'{epochs.info["temp"]}_autoreject')
 
     return epochs_autoreject
 

@@ -148,7 +148,8 @@ def concat_raws_with_suffix(path_to_raw_files: str, suffix: str) -> Raw:
 
     raw_file_path = Path(path_to_raw_files)
     file_names_in_order = sorted(
-        [Path(f).stem for f in os.listdir(path_to_raw_files) if f.endswith(suffix)])
+        [Path(f).stem for f in os.listdir(path_to_raw_files) if f.endswith(suffix)]
+    )
     files = [raw_file_path.joinpath(f + suffix) for f in file_names_in_order]
 
     raws = [read_raw(file, preload=False, verbose=True) for file in files]

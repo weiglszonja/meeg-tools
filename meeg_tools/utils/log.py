@@ -37,7 +37,7 @@ def update_log(log_file_path: str, epochs: Epochs, notes: str) -> pd.DataFrame:
             "lowpass": [epochs.info["lowpass"]],
             "n_components": [np.NaN],
             "n_bad_epochs": [n_bad_epochs],
-            "n_total_epochs": [len(epochs)],
+            "n_total_epochs": [len(epochs.drop_log)],
             "drop_percentage": [round(epochs.drop_log_stats(), 2)],
             "stimuli": [list(epochs.event_id.keys())],
             "t_min": [epochs.tmin],

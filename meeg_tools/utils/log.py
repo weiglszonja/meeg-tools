@@ -1,5 +1,6 @@
 import os
 from datetime import datetime
+import re
 
 import numpy as np
 import pandas as pd
@@ -7,12 +8,13 @@ import pandas as pd
 from mne import Epochs
 from mne.utils import logger
 
+from meeg_tools.utils.config import settings
+
 
 def update_log(log_file_path: str, epochs: Epochs, notes: str) -> pd.DataFrame:
     """
     Documents the changes during preprocessing for an Epochs object.
     Custom description can be added with the notes argument.
-    The file path has to contain the file extension too (.csv).
 
     Parameters
     ----------
@@ -29,6 +31,9 @@ def update_log(log_file_path: str, epochs: Epochs, notes: str) -> pd.DataFrame:
     n_bad_epochs = len(
         [drop for drop in epochs.drop_log if np.isin(dropped_epochs_marker, drop).any()]
     )
+    stimuli = list(epochs.event_id.keys())
+    n_epochs_per_stimuli = [
+        (", ").join([f"{ind}: {len(epochs[ind])}" for ind in stimuli])]
 
     log = pd.DataFrame(
         {
@@ -37,8 +42,8 @@ def update_log(log_file_path: str, epochs: Epochs, notes: str) -> pd.DataFrame:
             "lowpass": [epochs.info["lowpass"]],
             "n_components": [np.NaN],
             "n_bad_epochs": [n_bad_epochs],
-            "n_total_epochs": [len(epochs.drop_log)],
-            "drop_percentage": [round(epochs.drop_log_stats(), 2)],
+            "total_drop_percentage": [round(epochs.drop_log_stats(), 2)],
+            "n_epochs_per_stimuli": n_epochs_per_stimuli,
             "stimuli": [list(epochs.event_id.keys())],
             "t_min": [epochs.tmin],
             "t_max": [epochs.tmax],
@@ -47,6 +52,7 @@ def update_log(log_file_path: str, epochs: Epochs, notes: str) -> pd.DataFrame:
             "baseline": [epochs.baseline if epochs.baseline else np.NaN],
             "notes": [notes],
             "date_of_update": [datetime.utcnow().isoformat()],
+            "author": [settings["log"]["author"]]
         }
     )
 
@@ -70,9 +76,15 @@ def update_log(log_file_path: str, epochs: Epochs, notes: str) -> pd.DataFrame:
         n_interpolated = len(interpolated_channels_str.split(","))
         log["n_interpolated"].update(n_interpolated)
 
-    if os.path.isfile(log_file_path):
-        log.to_csv(log_file_path, mode="a", index=False, header=False)
+    author_clean = re.sub("\W+", "", settings["log"]["author"])
+    log_file_name = f"{author_clean}_log.csv"
+    if os.path.isfile(os.path.join(log_file_path, log_file_name)):
+        log.to_csv(os.path.join(log_file_path, log_file_name),
+                   mode="a",
+                   index=False,
+                   header=False)
     else:
-        log.to_csv(log_file_path, index=False)
+        log.to_csv(os.path.join(log_file_path, log_file_name),
+                   index=False)
 
     return log

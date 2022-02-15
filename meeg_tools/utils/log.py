@@ -87,7 +87,6 @@ def update_log(log_file_path: str, epochs: Epochs, notes: str) -> pd.DataFrame:
             header=False,
         )
     else:
-        log.to_csv(os.path.join(log_file_path, log_file_name),
-                   index=False)
+        log.to_csv(os.path.join(log_file_path, log_file_name), index=False)
 
     return log

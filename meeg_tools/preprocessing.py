@@ -122,7 +122,7 @@ def apply_ica(epochs: Epochs, ica: ICA) -> Epochs:
 
 
 def run_autoreject(
-    epochs: Epochs, n_jobs: int = 11, subset: bool = False
+        epochs: Epochs, n_jobs: int = 11, subset: bool = False
 ) -> autoreject.RejectLog:
     """
     Finds bad epochs based on AutoReject.
@@ -167,12 +167,17 @@ def run_autoreject(
 
     reject_log.report = bad_epochs
 
+    auto_bad_epochs = np.where(reject_log.bad_epochs)[0].tolist()
+    if len(bad_epochs) < len(auto_bad_epochs):
+        reject_log.report = sorted(
+            list(set(bad_epochs + auto_bad_epochs)))
+
     logger.info(
         "\nAUTOREJECT report\n"
         f"There are {len(epochs_autoreject[reject_log.bad_epochs])} "
         f"bad epochs found with Autoreject. "
         f"You can assess these epochs with reject_log.bad_epochs\n"
-        f"\nThere are {len(bad_epochs)} bad epochs where more than "
+        f"\nThere are {len(reject_log.report)} bad epochs where more than "
         f"{int(threshold * 100)}% of the channels were noisy. "
         f"You can assess these epochs with reject_log.report"
     )

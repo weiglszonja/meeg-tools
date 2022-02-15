@@ -80,10 +80,12 @@ def update_log(log_file_path: str, epochs: Epochs, notes: str) -> pd.DataFrame:
     author_clean = re.sub("\W+", "", settings["log"]["author"])
     log_file_name = f"{author_clean}_log.csv"
     if os.path.isfile(os.path.join(log_file_path, log_file_name)):
-        log.to_csv(os.path.join(log_file_path, log_file_name),
-                   mode="a",
-                   index=False,
-                   header=False)
+        log.to_csv(
+            os.path.join(log_file_path, log_file_name),
+            mode="a",
+            index=False,
+            header=False,
+        )
     else:
         log.to_csv(os.path.join(log_file_path, log_file_name),
                    index=False)

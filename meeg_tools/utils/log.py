@@ -53,7 +53,7 @@ def update_log(log_file_path: str, epochs: Epochs, notes: str) -> pd.DataFrame:
             "baseline": [epochs.baseline if epochs.baseline else np.NaN],
             "notes": [notes],
             "date_of_update": [datetime.utcnow().isoformat()],
-            "author": [settings["log"]["author"]]
+            "author": [settings["log"]["author"]],
         }
     )
 

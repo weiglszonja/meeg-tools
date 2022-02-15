@@ -33,7 +33,8 @@ def update_log(log_file_path: str, epochs: Epochs, notes: str) -> pd.DataFrame:
     )
     stimuli = list(epochs.event_id.keys())
     n_epochs_per_stimuli = [
-        (", ").join([f"{ind}: {len(epochs[ind])}" for ind in stimuli])]
+        (", ").join([f"{ind}: {len(epochs[ind])}" for ind in stimuli])
+    ]
 
     log = pd.DataFrame(
         {

@@ -169,8 +169,7 @@ def run_autoreject(
 
     auto_bad_epochs = np.where(reject_log.bad_epochs)[0].tolist()
     if len(bad_epochs) < len(auto_bad_epochs):
-        reject_log.report = sorted(
-            list(set(bad_epochs + auto_bad_epochs)))
+        reject_log.report = sorted(list(set(bad_epochs + auto_bad_epochs)))
 
     logger.info(
         "\nAUTOREJECT report\n"

@@ -150,11 +150,17 @@ def concat_raws_with_suffix(path_to_raw_files: str, suffix: str) -> Raw:
 
     raw_file_path = Path(path_to_raw_files)
     file_names_in_order = sorted(
-        [f.stem for f in raw_file_path.rglob('*.*') if f.suffix == suffix])
-    files = [str(f) for file_name in file_names_in_order for f in
-             raw_file_path.rglob(f'{file_name}{suffix}')]
-    logger.info(f"Found {len(file_names_in_order)} files with {suffix} extension:\n"
-                f"{', '.join(files)}")
+        [f.stem for f in raw_file_path.rglob("*.*") if f.suffix == suffix]
+    )
+    files = [
+        str(f)
+        for file_name in file_names_in_order
+        for f in raw_file_path.rglob(f"{file_name}{suffix}")
+    ]
+    logger.info(
+        f"Found {len(file_names_in_order)} files with {suffix} extension:\n"
+        f"{', '.join(files)}"
+    )
     raws = [read_raw(file, preload=False, verbose=True) for file in files]
     raw = concatenate_raws(raws)
     # Session parameters

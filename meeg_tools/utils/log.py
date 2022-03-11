@@ -33,7 +33,8 @@ def update_log(log_file_path: str, epochs: Epochs, notes: str) -> pd.DataFrame:
     )
     stimuli = list(epochs.event_id.keys())
     n_epochs_per_stimuli = [
-        (", ").join([f"{ind}: {len(epochs[ind])}" for ind in stimuli])]
+        (", ").join([f"{ind}: {len(epochs[ind])}" for ind in stimuli])
+    ]
 
     log = pd.DataFrame(
         {
@@ -52,7 +53,7 @@ def update_log(log_file_path: str, epochs: Epochs, notes: str) -> pd.DataFrame:
             "baseline": [epochs.baseline if epochs.baseline else np.NaN],
             "notes": [notes],
             "date_of_update": [datetime.utcnow().isoformat()],
-            "author": [settings["log"]["author"]]
+            "author": [settings["log"]["author"]],
         }
     )
 
@@ -79,12 +80,13 @@ def update_log(log_file_path: str, epochs: Epochs, notes: str) -> pd.DataFrame:
     author_clean = re.sub("\W+", "", settings["log"]["author"])
     log_file_name = f"{author_clean}_log.csv"
     if os.path.isfile(os.path.join(log_file_path, log_file_name)):
-        log.to_csv(os.path.join(log_file_path, log_file_name),
-                   mode="a",
-                   index=False,
-                   header=False)
+        log.to_csv(
+            os.path.join(log_file_path, log_file_name),
+            mode="a",
+            index=False,
+            header=False,
+        )
     else:
-        log.to_csv(os.path.join(log_file_path, log_file_name),
-                   index=False)
+        log.to_csv(os.path.join(log_file_path, log_file_name), index=False)
 
     return log

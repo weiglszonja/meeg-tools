@@ -122,7 +122,7 @@ def apply_ica(epochs: Epochs, ica: ICA) -> Epochs:
 
 
 def run_autoreject(
-        epochs: Epochs, n_jobs: int = 11, subset: bool = False
+    epochs: Epochs, n_jobs: int = 11, subset: bool = False
 ) -> autoreject.RejectLog:
     """
     Finds bad epochs based on AutoReject.
@@ -169,8 +169,7 @@ def run_autoreject(
 
     auto_bad_epochs = np.where(reject_log.bad_epochs)[0].tolist()
     if len(bad_epochs) < len(auto_bad_epochs):
-        reject_log.report = sorted(
-            list(set(bad_epochs + auto_bad_epochs)))
+        reject_log.report = sorted(list(set(bad_epochs + auto_bad_epochs)))
 
     logger.info(
         "\nAUTOREJECT report\n"

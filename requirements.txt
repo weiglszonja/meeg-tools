@@ -15,3 +15,5 @@ tqdm
 #pywin32
 pyyaml~=6.0
 yasa
+mne_connectivity
+h5netcdf

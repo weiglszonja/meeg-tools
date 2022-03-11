@@ -4,24 +4,20 @@ in the sensor space using MNE-Python.
 https://mne.tools/mne-connectivity/stable/generated/mne_connectivity.spectral_connectivity.html
 https://mne.tools/mne-connectivity/stable/auto_examples/sensor_connectivity.html#sphx-glr-auto-examples-sensor-connectivity-py
 """
-import numpy as np
+from collections import Iterable
+
 from matplotlib import pyplot as plt
 
 from mne import Epochs
-from mne.connectivity import spectral_connectivity
+from mne_connectivity import spectral_connectivity_epochs, SpectralConnectivity
 from mne.preprocessing import compute_current_source_density
 
 
-def compute_connectivity(epochs: Epochs, **kwargs) -> np.ndarray:
+def compute_connectivity(epochs: Epochs, config: dict) -> SpectralConnectivity:
     """
     Compute channel level connectivity matrix from Epochs instance.
     Returns the computed connectivity matrix (n_freqs, n_signals, n_signals).
 
-    Args:
-        str spectrum_mode: Valid estimation mode 'fourier' or 'multitaper'
-        Epochs epochs: Epochs extracted from a Raw instance
-        str method: connectivity estimation method
-        int n_jobs: number of epochs to process in parallel
     :return: np.ndarray con: The computed connectivity matrix with a shape of
     (n_freqs, n_signals, n_signals).
 
@@ -31,31 +27,56 @@ def compute_connectivity(epochs: Epochs, **kwargs) -> np.ndarray:
     https://docs.scipy.org/doc/numpy/reference/generated/numpy.fft.rfftfreq.html
     """
     # spacing between frequency bins
-    spacing = epochs.info["sfreq"] / epochs.get_data().shape[-1]
+    # spacing = np.round(epochs.info["sfreq"] / epochs.get_data().shape[-1], 2)
+    freq_bands = sorted(config["bands"].values())
 
-    low_cutoff = tuple(band[0] for band in kwargs["freqs"])
-    high_cutoff = tuple(
-        band[1] - spacing if band != max(kwargs["freqs"]) else band[1]
-        for band in kwargs["freqs"]
-    )
+    low_cutoff = tuple(freq[0] for freq in freq_bands)
+    high_cutoff = tuple(freq[1] for freq in freq_bands)
+    # high_cutoff = tuple(
+    #     freq[1] - spacing if freq != max(freq_bands) else freq[1]
+    #     for freq in freq_bands
+    # )
 
-    epochs_csd = compute_surface_laplacian(epochs=epochs, verbose=False)
-    con, _, _, _, _ = spectral_connectivity(
-        data=epochs_csd,
-        method=kwargs["method"],
+    if config["use_laplace"]:
+        epochs_csd = compute_surface_laplacian(epochs=epochs, verbose=False)
+    else:
+        epochs_csd = epochs.copy()
+
+    con = spectral_connectivity_epochs(
+        epochs_csd,
+        method=config["method"],
+        mode='multitaper',
         sfreq=epochs.info["sfreq"],
-        mode=kwargs["mode"],
         fmin=low_cutoff,
         fmax=high_cutoff,
-        faverage=kwargs["faverage"],
-        n_jobs=kwargs["n_jobs"],
-        verbose=True,
-    )
+        faverage=True,
+        tmin=config["tmin"],
+        tmax=config["tmax"],
+        n_jobs=11,
+        verbose=False)
+    # con, _, _, _, _ = spectral_connectivity(
+    #     data=epochs_csd,
+    #     method=kwargs["method"],
+    #     sfreq=epochs.info["sfreq"],
+    #     mode=kwargs["mode"],
+    #     fmin=low_cutoff,
+    #     fmax=high_cutoff,
+    #     faverage=kwargs["faverage"],
+    #     n_jobs=kwargs["n_jobs"],
+    #     verbose=True,
+    # )
+    #
+    # # from shape of (n_signals, n_signals, n_freqs) to
+    # # (n_freqs, n_signals, n_signals)
+    # con = np.transpose(con, (2, 0, 1))
+    # con = abs(con)
 
-    # from shape of (n_signals, n_signals, n_freqs) to
-    # (n_freqs, n_signals, n_signals)
-    con = np.transpose(con, (2, 0, 1))
-    con = abs(con)
+    if all(isinstance(el, Iterable) for el in con.attrs["freqs_used"]):
+        con.attrs["freqs_used"] = [freq for freq_arr in con.attrs["freqs_used"]
+                                   for freq in freq_arr]
+
+    # make sure all connectivity values are positive
+    con.xarray.values = abs(con.xarray.values)
 
     return con
 

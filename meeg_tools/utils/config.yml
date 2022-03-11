@@ -1,7 +1,26 @@
 analysis:
     overwrite: yes
     picks: eeg
-    mode: power
+    mode: con
+    conditions:
+        - triplet
+power:
+    is_evoked: no
+    morlet:
+        fmin: 4
+        fmax: 45
+        step: 30
+        decim: 1
+    postfix: tfr.h5
+erp:
+    method: median
+    postfix: ave.fif.gz
+con:
+    tmin: 0.0
+    tmax: 0.75
+    use_laplace: no
+    method: wpli
+    postfix: con.nc
     bands:
         theta:
             - 4.0
@@ -15,12 +34,3 @@ analysis:
         gamma:
             - 30.0
             - 45.0
-    conditions:
-        - triplet
-power:
-    is_evoked: yes
-    morlet:
-        fmin: 4
-        fmax: 45
-        step: 30
-        decim: 1

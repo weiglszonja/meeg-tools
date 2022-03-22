@@ -76,6 +76,7 @@ def update_log(log_file_path: str, epochs: Epochs, notes: str) -> pd.DataFrame:
         interpolated_channels_str = description_plain.split("interpolated")[1]
         n_interpolated = len(interpolated_channels_str.split(","))
         log["n_interpolated"].update(n_interpolated)
+        log["interpolated"] = interpolated_channels_str
 
     author_clean = re.sub("\W+", "", settings["log"]["author"])
     log_file_name = f"{author_clean}_log.csv"

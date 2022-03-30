@@ -204,9 +204,7 @@ def create_metadata(epochs: Epochs):
         metadata["id"].isin([10, 110, 14, 114, 12, 112, 16, 116]), "stimuli"
     ] = "R"
 
-    metadata.loc[
-        metadata["id"].isin([10, 11, 110, 111]), "rewiring"
-    ] = "H-L"
+    metadata.loc[metadata["id"].isin([10, 11, 110, 111]), "rewiring"] = "H-L"
 
     metadata.loc[metadata["id"].isin([12, 13, 112, 113]), "rewiring"] = "L-H"
 

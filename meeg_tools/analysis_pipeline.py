@@ -14,6 +14,8 @@ from mne.utils import logger
 from meeg_tools.connectivity import compute_connectivity
 from meeg_tools.time_frequency import compute_power, save_to_hdf5, compute_erp
 
+from meeg_tools.utils.epochs import create_metadata
+
 # file path to configuration file
 CONFIGURATION_FILE_PATH = "utils/config.yml"
 # file path to preprocessed epochs
@@ -114,6 +116,7 @@ def run_tfr_pipeline(source: Path, target: Path, conf: dict):
 
         if condition_names:
             if isinstance(epochs.metadata, pd.DataFrame):
+                epochs.metadata = create_metadata(epochs)
                 epochs.metadata = epochs.metadata.astype(str)
                 if all(name in epochs.metadata.columns for name in condition_names):
                     for condition_values, _ in epochs.metadata.groupby(condition_names):

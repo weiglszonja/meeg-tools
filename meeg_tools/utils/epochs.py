@@ -122,23 +122,49 @@ def create_metadata(epochs: Epochs):
     -------
 
     """
-    metadata = pd.DataFrame(
-        data=epochs.events, columns=["time_in_samples", "stim", "id"]
-    )
 
-    # we can add boundaries of epochs
-    epoch_boundaries = [211, 212, 213, 214, 215, 216]
+    if isinstance(epochs.metadata, pd.DataFrame):
+        metadata = epochs.metadata
+    else:
+        metadata = pd.DataFrame(
+            data=epochs.events, columns=["time_in_samples", "stim", "id"]
+        )
 
-    edges = np.where(np.isin(epochs.events[..., 2], epoch_boundaries))[0]
+        # we can add boundaries of epochs
+        epoch_boundaries = [211, 212, 213, 214, 215, 216]
 
-    boundaries = dict(zip(epoch_boundaries, edges))
-    logger.info("Found these indices for these epoch boundary events: ")
-    logger.info("\n".join("{}\t{}".format(k, v) for k, v in boundaries.items()))
-    for epoch_ind, epoch in enumerate(np.split(epochs.events, edges, axis=0)):
-        if epoch_ind != len(edges):
-            metadata.loc[metadata["time_in_samples"].isin(epoch[..., 0]), "epoch"] = (
-                epoch_ind + 1
+        edges = np.where(np.isin(epochs.events[..., 2], epoch_boundaries))[0]
+
+        boundaries = dict(zip(epoch_boundaries, edges))
+        logger.info("Found these indices for these epoch boundary events: ")
+        logger.info("\n".join("{}\t{}".format(k, v) for k, v in boundaries.items()))
+        for epoch_ind, epoch in enumerate(np.split(epochs.events, edges, axis=0)):
+            if epoch_ind != len(edges):
+                metadata.loc[
+                    metadata["time_in_samples"].isin(epoch[..., 0]), "epoch"] = (
+                        epoch_ind + 1
+                )
+
+        metadata.loc[
+            metadata["id"].isin([44, 45, 46, 47, 144, 145, 146, 147]), "answer"
+        ] = "incorrect"
+        metadata.loc[
+            ~metadata["id"].isin([44, 45, 46, 47, 144, 145, 146, 147]), "answer"
+        ] = "correct"
+
+        # find stimuli that are followed by an incorrect answer
+        stimuli = metadata[
+            metadata["id"].isin(
+                [10, 110, 11, 111, 12, 112, 13, 113, 14, 114, 15, 115, 16, 116]
             )
+        ]
+        stimuli_indices = np.asarray(stimuli["id"].index.tolist())
+        incorrect_indices = (
+                np.asarray(
+                    metadata.index[metadata["answer"] == "incorrect"].tolist()) - 1
+        )
+        incorrect_answers = stimuli_indices[np.isin(stimuli_indices, incorrect_indices)]
+        metadata.loc[incorrect_answers, "answer"] = "incorrect"
 
     metadata.loc[
         metadata["id"].isin([10, 110, 11, 111, 14, 114, 15, 115]), "triplet"
@@ -164,30 +190,35 @@ def create_metadata(epochs: Epochs):
         ),
         "triplet_type",
     ] = "P"
-    metadata.loc[
-        metadata["id"].isin([44, 45, 46, 47, 144, 145, 146, 147]), "answer"
-    ] = "incorrect"
-    metadata.loc[
-        ~metadata["id"].isin([44, 45, 46, 47, 144, 145, 146, 147]), "answer"
-    ] = "correct"
 
     metadata.loc[metadata["id"].isin([10, 11, 12, 13, 14, 15, 16]), "sequence"] = "A"
     metadata.loc[
         metadata["id"].isin([100, 111, 112, 113, 114, 115, 116]), "sequence"
     ] = "B"
 
-    # find stimuli that are followed by an incorrect answer
-    stimuli = metadata[
-        metadata["id"].isin(
-            [10, 110, 11, 111, 12, 112, 13, 113, 14, 114, 15, 115, 16, 116]
-        )
-    ]
-    stimuli_indices = np.asarray(stimuli["id"].index.tolist())
-    incorrect_indices = (
-        np.asarray(metadata.index[metadata["answer"] == "incorrect"].tolist()) - 1
-    )
-    incorrect_answers = stimuli_indices[np.isin(stimuli_indices, incorrect_indices)]
-    metadata.loc[incorrect_answers, "answer"] = "incorrect"
+    metadata.loc[
+        metadata["id"].isin([11, 13, 15, 111, 113, 115]), "stimuli"
+    ] = "P"
+
+    metadata.loc[
+        metadata["id"].isin([10, 110, 14, 114, 12, 112, 16, 116]), "stimuli"
+    ] = "R"
+
+    metadata.loc[
+        metadata["id"].isin([10, 11, 110, 111]), "rewiring"
+    ] = "H-L"
+
+    metadata.loc[
+        metadata["id"].isin([12, 13, 112, 113]), "rewiring"
+    ] = "L-H"
+
+    metadata.loc[
+        metadata["id"].isin([14, 15, 114, 115]), "rewiring"
+    ] = "H-H"
+
+    metadata.loc[
+        metadata["id"].isin([16, 116]), "rewiring"
+    ] = "L-L"
 
     return metadata
 

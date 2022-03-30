@@ -141,9 +141,8 @@ def create_metadata(epochs: Epochs):
         for epoch_ind, epoch in enumerate(np.split(epochs.events, edges, axis=0)):
             if epoch_ind != len(edges):
                 metadata.loc[
-                    metadata["time_in_samples"].isin(epoch[..., 0]), "epoch"] = (
-                        epoch_ind + 1
-                )
+                    metadata["time_in_samples"].isin(epoch[..., 0]), "epoch"
+                ] = (epoch_ind + 1)
 
         metadata.loc[
             metadata["id"].isin([44, 45, 46, 47, 144, 145, 146, 147]), "answer"

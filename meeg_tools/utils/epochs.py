@@ -160,8 +160,7 @@ def create_metadata(epochs: Epochs):
         ]
         stimuli_indices = np.asarray(stimuli["id"].index.tolist())
         incorrect_indices = (
-                np.asarray(
-                    metadata.index[metadata["answer"] == "incorrect"].tolist()) - 1
+            np.asarray(metadata.index[metadata["answer"] == "incorrect"].tolist()) - 1
         )
         incorrect_answers = stimuli_indices[np.isin(stimuli_indices, incorrect_indices)]
         metadata.loc[incorrect_answers, "answer"] = "incorrect"

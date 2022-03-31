@@ -17,3 +17,4 @@ pyyaml~=6.0
 yasa
 mne_connectivity
 h5netcdf
+h5io

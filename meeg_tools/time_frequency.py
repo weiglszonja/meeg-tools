@@ -264,7 +264,7 @@ def get_erp_measures_from_cross_condition_data(erp_arrays: List[EvokedArray],
                                                ignore_index=True)
 
         else:
-            for ch_name in erp.ch_names:
+            for ch_name in cross_condition_data['ch_name']:
                 tmin = cross_condition_data[
                            cross_condition_data['ch_name'] == ch_name][
                            'peak_latency'] - interval_in_seconds

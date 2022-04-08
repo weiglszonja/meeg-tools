@@ -388,15 +388,20 @@ def compute_power_difference(power_condition1: List[AverageTFR],
 
 
 def permutation_correlation(diff_data, info, n_permutations, p_value):
-    sensor_adjacency, ch_names = find_ch_adjacency(info, 'eeg')
-    adjacency = combine_adjacency(sensor_adjacency, diff_data.shape[2],
-                                  diff_data.shape[3])
+    sensor_adjacency, ch_names = find_ch_adjacency(info, "eeg")
+    adjacency = combine_adjacency(
+        sensor_adjacency, diff_data.shape[2], diff_data.shape[3]
+    )
 
-    T_obs, clusters, cluster_p_values, H0 = \
-        permutation_cluster_1samp_test(diff_data, n_permutations=n_permutations,
-                                       threshold=None, tail=0,
-                                       adjacency=adjacency,
-                                       out_type='mask', verbose=True)
+    T_obs, clusters, cluster_p_values, H0 = permutation_cluster_1samp_test(
+        diff_data,
+        n_permutations=n_permutations,
+        threshold=None,
+        tail=0,
+        adjacency=adjacency,
+        out_type="mask",
+        verbose=True,
+    )
 
     # Create new stats image with only significant clusters for plotting
     T_obs_plot = np.nan * np.ones_like(T_obs)

@@ -357,8 +357,13 @@ def read_evokeds_from_path(evokeds_path: str, pattern: str) -> List[Evoked]:
     -------
 
     """
-    files = sorted([f for f in os.listdir(evokeds_path) if
-                    pattern.lower() in f.lower() and not f.startswith(".")])
+    files = sorted(
+        [
+            f
+            for f in os.listdir(evokeds_path)
+            if pattern.lower() in f.lower() and not f.startswith(".")
+        ]
+    )
     evoked = [read_evokeds(os.path.join(evokeds_path, f), verbose=0)[0] for f in files]
 
     return evoked

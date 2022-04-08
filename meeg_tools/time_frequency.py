@@ -337,8 +337,13 @@ def read_tfrs_from_path(tfrs_path: str, pattern: str) -> List[AverageTFR]:
     -------
 
     """
-    files = sorted([f for f in os.listdir(tfrs_path) if
-                    pattern.lower() in f.lower() and not f.startswith(".")])
+    files = sorted(
+        [
+            f
+            for f in os.listdir(tfrs_path)
+            if pattern.lower() in f.lower() and not f.startswith(".")
+        ]
+    )
     tfrs = [read_tfrs(os.path.join(tfrs_path, f))[0] for f in files]
 
     return tfrs

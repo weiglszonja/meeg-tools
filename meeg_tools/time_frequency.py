@@ -253,8 +253,17 @@ def get_erp_measures_from_cross_condition_data(
     interval_in_seconds: float,
 ):
     erp_measures = pd.DataFrame(
-        columns=['fid', 'ch_name', 'tmin', 'tmax',
-                 'mode', 'peak_latency', 'peak_amplitude', 'mean_amplitude'])
+        columns=[
+            "fid",
+            "ch_name",
+            "tmin",
+            "tmax",
+            "mode",
+            "peak_latency",
+            "peak_amplitude",
+            "mean_amplitude",
+        ]
+    )
 
     picks = cross_condition_data['ch_name'].values[0].split()
     mode = cross_condition_data['mode'].values[0]

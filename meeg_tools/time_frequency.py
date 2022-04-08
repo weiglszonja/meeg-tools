@@ -265,10 +265,7 @@ def get_erp_measures_from_cross_condition_data(erp_arrays: List[EvokedArray],
                                            mode=mode,
                                            return_amplitude=True)
 
-            mean_amp = get_mean_amplitude(erp=roi_erp,
-                                          tmin=tmin,
-                                          tmax=tmax,
-                                          mode=mode)
+            mean_amp = get_mean_amplitude(erp=roi_erp, tmin=tmin, tmax=tmax, mode=mode)
 
             fid = Path(erp.comment.replace("\\", "/")).name
             ch_name = cross_condition_data['ch_name'].values[0]

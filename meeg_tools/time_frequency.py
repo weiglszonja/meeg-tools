@@ -364,12 +364,14 @@ def read_evokeds_from_path(evokeds_path: str, pattern: str) -> List[Evoked]:
     return evoked
 
 
-def compute_power_difference(power_condition1: List[AverageTFR],
-                             power_condition2: List[AverageTFR],
-                             picks: [],
-                             baseline: None,
-                             tmin: float,
-                             tmax: float):
+def compute_power_difference(
+    power_condition1: List[AverageTFR],
+    power_condition2: List[AverageTFR],
+    picks: [],
+    baseline: None,
+    tmin: float,
+    tmax: float,
+):
 
     if not picks:
         picks = None

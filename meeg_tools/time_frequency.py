@@ -10,9 +10,10 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from mne import Epochs, EvokedArray, pick_channels
-from mne.channels import combine_channels
-from mne.time_frequency import tfr_morlet, AverageTFR
+from mne import Epochs, EvokedArray, pick_channels, read_evokeds, Evoked
+from mne.channels import combine_channels, find_ch_adjacency
+from mne.stats import combine_adjacency, permutation_cluster_1samp_test
+from mne.time_frequency import tfr_morlet, AverageTFR, read_tfrs
 from mne.utils import logger
 from yasa import irasa
 
@@ -321,3 +322,87 @@ def get_erp_measures_from_cross_condition_data(erp_arrays: List[EvokedArray],
                                                    ignore_index=True)
 
     return erp_measures
+
+
+def read_tfrs_from_path(tfrs_path: str, pattern: str) -> List[AverageTFR]:
+    """
+    Reads TFR files from path with a given pattern to look for within the file name. I.e.
+    used for separating conditions (e.g. H, L).
+    Parameters
+    ----------
+    tfrs_path
+    pattern
+
+    Returns
+    -------
+
+    """
+    files = sorted([f for f in os.listdir(tfrs_path) if
+                    pattern.lower() in f.lower() and not f.startswith(".")])
+    tfrs = [read_tfrs(os.path.join(tfrs_path, f))[0] for f in files]
+
+    return tfrs
+
+
+def read_evokeds_from_path(evokeds_path: str, pattern: str) -> List[Evoked]:
+    """
+    Reads Evoked files from path with a given pattern to look for within the file name. I.e.
+    used for separating conditions (e.g. H, L).
+    Parameters
+    ----------
+    evokeds_path
+    pattern
+
+    Returns
+    -------
+
+    """
+    files = sorted([f for f in os.listdir(evokeds_path) if
+                    pattern.lower() in f.lower() and not f.startswith(".")])
+    evoked = [read_evokeds(os.path.join(evokeds_path, f), verbose=0)[0] for f in files]
+
+    return evoked
+
+
+def compute_power_difference(power_condition1: List[AverageTFR],
+                             power_condition2: List[AverageTFR],
+                             picks: [],
+                             baseline: None,
+                             tmin: float,
+                             tmax: float):
+
+    if not picks:
+        picks = None
+
+    diff_over_participants = []
+    for power1, power2 in zip(power_condition1, power_condition2):
+        power1.pick_channels(picks).apply_baseline(baseline).crop(tmin=tmin, tmax=tmax)
+        power2.pick_channels(picks).apply_baseline(baseline).crop(tmin=tmin, tmax=tmax)
+        difference_data = (power1.data * 1e6) - (power2.data * 1e6)
+
+        diff_over_participants.append(difference_data[np.newaxis, ...])
+
+    diff_data = np.concatenate(diff_over_participants, axis=0)
+
+    return diff_data
+
+
+def permutation_correlation(diff_data, info, n_permutations, p_value):
+    sensor_adjacency, ch_names = find_ch_adjacency(info, 'eeg')
+    adjacency = combine_adjacency(sensor_adjacency, diff_data.shape[2],
+                                  diff_data.shape[3])
+
+    T_obs, clusters, cluster_p_values, H0 = \
+        permutation_cluster_1samp_test(diff_data, n_permutations=n_permutations,
+                                       threshold=None, tail=0,
+                                       adjacency=adjacency,
+                                       out_type='mask', verbose=True)
+
+    # Create new stats image with only significant clusters for plotting
+    T_obs_plot = np.nan * np.ones_like(T_obs)
+    for c, p_val in zip(clusters, cluster_p_values):
+        if p_val <= p_value:
+            print(f"Significant cluster with p-value {p_val}")
+            T_obs_plot[c] = T_obs[c]
+
+    return T_obs_plot, cluster_p_values[cluster_p_values <= p_value]

@@ -239,7 +239,7 @@ def get_mean_amplitude(erp, tmin, tmax, mode):
             )
         else:
             sign_mean_data = data[data < 0]
-    elif mode == 'abs':
+    elif mode == "abs":
         sign_mean_data = abs(sign_mean_data)
 
     mean_amplitude = sign_mean_data.mean(axis=0) * 1e6

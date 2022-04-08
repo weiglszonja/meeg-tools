@@ -172,8 +172,16 @@ def get_erp_peak_measures(erp: EvokedArray,
         picks = []
 
     erp_measures = pd.DataFrame(
-        columns=['fid', 'ch_name', 'tmin', 'tmax', 'mode', 'peak_latency',
-                 'peak_amplitude'])
+        columns=[
+            "fid",
+            "ch_name",
+            "tmin",
+            "tmax",
+            "mode",
+            "peak_latency",
+            "peak_amplitude",
+        ]
+    )
 
     if combine:
         picks_idx = pick_channels(erp.info['ch_names'], include=picks)

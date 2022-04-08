@@ -223,7 +223,7 @@ def get_mean_amplitude(erp, tmin, tmax, mode):
                            'No positive values encountered. Using default mode.')
         else:
             sign_mean_data = data[data > 0]
-    elif mode == 'neg':
+    elif mode == "neg":
         if not np.any(data < 0):
             logger.warning(f'{erp.comment} :'
                            'No negative values encountered. Using default mode.')

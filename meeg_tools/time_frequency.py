@@ -10,9 +10,10 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from mne import Epochs, EvokedArray, pick_channels
-from mne.channels import combine_channels
-from mne.time_frequency import tfr_morlet, AverageTFR
+from mne import Epochs, EvokedArray, pick_channels, read_evokeds, Evoked
+from mne.channels import combine_channels, find_ch_adjacency
+from mne.stats import combine_adjacency, permutation_cluster_1samp_test
+from mne.time_frequency import tfr_morlet, AverageTFR, read_tfrs
 from mne.utils import logger
 from yasa import irasa
 
@@ -142,7 +143,8 @@ def get_erp_peak_measures(erp: EvokedArray,
                           tmin: float,
                           tmax: float,
                           mode: str,
-                          picks=None, ) -> pd.DataFrame:
+                          picks=None,
+                          combine='mean') -> pd.DataFrame:
     """
     Computes peak measures (peak latency, peak amplitude) from Evoked instance for a
     given time interval defined by tmin and tmax in seconds. Peak measures can be
@@ -158,6 +160,8 @@ def get_erp_peak_measures(erp: EvokedArray,
     mode: 'pos': finds the peak with a positive voltage (ignores negative voltages)
     'neg': finds the peak with a negative voltage (ignores positive voltages)
     'abs': finds the peak with the largest absolute voltage regardless of sign (positive or negative)
+    combine: whether to combine channels (defined by picks) using 'mean', 'median' or 'std'
+    use None to not combine channels but get peak measures separately for each channel
     picks
 
     Returns
@@ -168,12 +172,20 @@ def get_erp_peak_measures(erp: EvokedArray,
         picks = []
 
     erp_measures = pd.DataFrame(
-        columns=['fid', 'ch_name', 'tmin', 'tmax', 'mode', 'peak_latency',
-                 'peak_amplitude'])
+        columns=[
+            "fid",
+            "ch_name",
+            "tmin",
+            "tmax",
+            "mode",
+            "peak_latency",
+            "peak_amplitude",
+        ]
+    )
 
-    if picks:
-        picks_idx = pick_channels(erp.info['ch_names'], include=picks)
-        roi_erp = combine_channels(erp, dict(roi=picks_idx), method='mean')
+    if combine:
+        picks_idx = pick_channels(erp.info["ch_names"], include=picks)
+        roi_erp = combine_channels(erp, dict(roi=picks_idx), method=combine)
         _, lat, amp = roi_erp.get_peak(ch_type='eeg',
                                        tmin=tmin,
                                        tmax=tmax,
@@ -191,7 +203,7 @@ def get_erp_peak_measures(erp: EvokedArray,
                                            ignore_index=True)
 
     else:
-        for ch_name in erp.ch_names:
+        for ch_name in picks:
             _, lat, amp = erp.copy().pick(ch_name).get_peak(ch_type='eeg',
                                                             tmin=tmin,
                                                             tmax=tmax,
@@ -210,12 +222,48 @@ def get_erp_peak_measures(erp: EvokedArray,
     return erp_measures
 
 
-def get_erp_measures_from_cross_condition_data(erp_arrays: List[EvokedArray],
-                                               cross_condition_data: pd.DataFrame,
-                                               interval_in_seconds: float):
+def get_mean_amplitude(erp, tmin, tmax, mode):
+    data = erp.crop(tmin=tmin, tmax=tmax).data
+    sign_mean_data = data.squeeze()
+    if mode == "pos":
+        if not np.any(data > 0):
+            logger.warning(
+                f"{erp.comment} :" "No positive values encountered. Using default mode."
+            )
+        else:
+            sign_mean_data = data[data > 0]
+    elif mode == "neg":
+        if not np.any(data < 0):
+            logger.warning(
+                f"{erp.comment} :" "No negative values encountered. Using default mode."
+            )
+        else:
+            sign_mean_data = data[data < 0]
+    elif mode == "abs":
+        sign_mean_data = abs(sign_mean_data)
+
+    mean_amplitude = sign_mean_data.mean(axis=0) * 1e6
+
+    return mean_amplitude
+
+
+def get_erp_measures_from_cross_condition_data(
+    erp_arrays: List[EvokedArray],
+    cross_condition_data: pd.DataFrame,
+    interval_in_seconds: float,
+):
     erp_measures = pd.DataFrame(
-        columns=['fid', 'ch_name', 'tmin', 'tmax',
-                 'mode', 'peak_latency', 'peak_amplitude', 'mean_amplitude'])
+        columns=[
+            "fid",
+            "ch_name",
+            "tmin",
+            "tmax",
+            "mode",
+            "peak_latency",
+            "peak_amplitude",
+            "mean_amplitude",
+        ]
+    )
 
     picks = cross_condition_data['ch_name'].values[0].split()
     mode = cross_condition_data['mode'].values[0]
@@ -238,20 +286,9 @@ def get_erp_measures_from_cross_condition_data(erp_arrays: List[EvokedArray],
                                            mode=mode,
                                            return_amplitude=True)
 
-            erp_data_crop = roi_erp.crop(tmin=tmin, tmax=tmax).data
+            mean_amp = get_mean_amplitude(erp=roi_erp, tmin=tmin, tmax=tmax, mode=mode)
 
-            if mode == 'pos':
-                sign_mean_data = erp_data_crop[erp_data_crop > 0]
-            elif mode == 'neg':
-                sign_mean_data = erp_data_crop[erp_data_crop < 0]
-            elif mode == 'abs':
-                sign_mean_data = abs(erp_data_crop)
-            else:
-                sign_mean_data = erp_data_crop
-
-            mean_amp = sign_mean_data.mean(axis=0) * 1e6
-
-            fid = Path(erp.comment).name
+            fid = Path(erp.comment.replace("\\", "/")).name
             ch_name = cross_condition_data['ch_name'].values[0]
             erp_measures = erp_measures.append(dict(fid=fid,
                                                     ch_name=ch_name,
@@ -264,7 +301,7 @@ def get_erp_measures_from_cross_condition_data(erp_arrays: List[EvokedArray],
                                                ignore_index=True)
 
         else:
-            for ch_name in erp.ch_names:
+            for ch_name in cross_condition_data['ch_name']:
                 tmin = cross_condition_data[
                            cross_condition_data['ch_name'] == ch_name][
                            'peak_latency'] - interval_in_seconds
@@ -286,20 +323,12 @@ def get_erp_measures_from_cross_condition_data(erp_arrays: List[EvokedArray],
                                                                 mode=mode,
                                                                 return_amplitude=True)
 
-                erp_data_crop = erp.copy().pick(ch_name).crop(tmin=tmin, tmax=tmax).data
+                mean_amp = get_mean_amplitude(erp=erp.copy().pick(ch_name),
+                                              tmin=tmin,
+                                              tmax=tmax,
+                                              mode=mode)
 
-                if mode == 'pos':
-                    sign_mean_data = erp_data_crop[erp_data_crop > 0]
-                elif mode == 'neg':
-                    sign_mean_data = erp_data_crop[erp_data_crop < 0]
-                elif mode == 'abs':
-                    sign_mean_data = abs(erp_data_crop)
-                else:
-                    sign_mean_data = erp_data_crop
-
-                mean_amp = sign_mean_data.mean(axis=0) * 1e6
-
-                fid = Path(erp.comment).name
+                fid = Path(erp.comment.replace("\\", "/")).name
                 erp_measures = erp_measures.append(dict(fid=fid,
                                                         ch_name=ch_name,
                                                         tmin=tmin,
@@ -311,3 +340,104 @@ def get_erp_measures_from_cross_condition_data(erp_arrays: List[EvokedArray],
                                                    ignore_index=True)
 
     return erp_measures
+
+
+def read_tfrs_from_path(tfrs_path: str, pattern: str) -> List[AverageTFR]:
+    """
+    Reads TFR files from path with a given pattern to look for within the file name. I.e.
+    used for separating conditions (e.g. H, L).
+    Parameters
+    ----------
+    tfrs_path
+    pattern
+
+    Returns
+    -------
+
+    """
+    files = sorted(
+        [
+            f
+            for f in os.listdir(tfrs_path)
+            if pattern.lower() in f.lower() and not f.startswith(".")
+        ]
+    )
+    tfrs = [read_tfrs(os.path.join(tfrs_path, f))[0] for f in files]
+
+    return tfrs
+
+
+def read_evokeds_from_path(evokeds_path: str, pattern: str) -> List[Evoked]:
+    """
+    Reads Evoked files from path with a given pattern to look for within the file name. I.e.
+    used for separating conditions (e.g. H, L).
+    Parameters
+    ----------
+    evokeds_path
+    pattern
+
+    Returns
+    -------
+
+    """
+    files = sorted(
+        [
+            f
+            for f in os.listdir(evokeds_path)
+            if pattern.lower() in f.lower() and not f.startswith(".")
+        ]
+    )
+    evoked = [read_evokeds(os.path.join(evokeds_path, f), verbose=0)[0] for f in files]
+
+    return evoked
+
+
+def compute_power_difference(
+    power_condition1: List[AverageTFR],
+    power_condition2: List[AverageTFR],
+    picks: [],
+    baseline: None,
+    tmin: float,
+    tmax: float,
+):
+
+    if not picks:
+        picks = None
+
+    diff_over_participants = []
+    for power1, power2 in zip(power_condition1, power_condition2):
+        power1.pick_channels(picks).apply_baseline(baseline).crop(tmin=tmin, tmax=tmax)
+        power2.pick_channels(picks).apply_baseline(baseline).crop(tmin=tmin, tmax=tmax)
+        difference_data = (power1.data * 1e6) - (power2.data * 1e6)
+
+        diff_over_participants.append(difference_data[np.newaxis, ...])
+
+    diff_data = np.concatenate(diff_over_participants, axis=0)
+
+    return diff_data
+
+
+def permutation_correlation(diff_data, info, n_permutations, p_value):
+    sensor_adjacency, ch_names = find_ch_adjacency(info, "eeg")
+    adjacency = combine_adjacency(
+        sensor_adjacency, diff_data.shape[2], diff_data.shape[3]
+    )
+
+    T_obs, clusters, cluster_p_values, H0 = permutation_cluster_1samp_test(
+        diff_data,
+        n_permutations=n_permutations,
+        threshold=None,
+        tail=0,
+        adjacency=adjacency,
+        out_type="mask",
+        verbose=True,
+    )
+
+    # Create new stats image with only significant clusters for plotting
+    T_obs_plot = np.nan * np.ones_like(T_obs)
+    for c, p_val in zip(clusters, cluster_p_values):
+        if p_val <= p_value:
+            print(f"Significant cluster with p-value {p_val}")
+            T_obs_plot[c] = T_obs[c]
+
+    return T_obs_plot, cluster_p_values[cluster_p_values <= p_value]

@@ -219,8 +219,9 @@ def get_mean_amplitude(erp, tmin, tmax, mode):
     sign_mean_data = data.squeeze()
     if mode == 'pos':
         if not np.any(data > 0):
-            logger.warning(f'{erp.comment} :'
-                           'No positive values encountered. Using default mode.')
+            logger.warning(
+                f"{erp.comment} :" "No positive values encountered. Using default mode."
+            )
         else:
             sign_mean_data = data[data > 0]
     elif mode == "neg":

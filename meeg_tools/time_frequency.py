@@ -210,6 +210,29 @@ def get_erp_peak_measures(erp: EvokedArray,
     return erp_measures
 
 
+def get_mean_amplitude(erp, tmin, tmax, mode):
+    data = erp.crop(tmin=tmin, tmax=tmax).data
+    sign_mean_data = data.squeeze()
+    if mode == 'pos':
+        if not np.any(data > 0):
+            logger.warning(f'{erp.comment} :'
+                           'No positive values encountered. Using default mode.')
+        else:
+            sign_mean_data = data[data > 0]
+    elif mode == 'neg':
+        if not np.any(data < 0):
+            logger.warning(f'{erp.comment} :'
+                           'No negative values encountered. Using default mode.')
+        else:
+            sign_mean_data = data[data < 0]
+    elif mode == 'abs':
+        sign_mean_data = abs(sign_mean_data)
+
+    mean_amplitude = sign_mean_data.mean(axis=0) * 1e6
+
+    return mean_amplitude
+
+
 def get_erp_measures_from_cross_condition_data(erp_arrays: List[EvokedArray],
                                                cross_condition_data: pd.DataFrame,
                                                interval_in_seconds: float):
@@ -238,20 +261,12 @@ def get_erp_measures_from_cross_condition_data(erp_arrays: List[EvokedArray],
                                            mode=mode,
                                            return_amplitude=True)
 
-            erp_data_crop = roi_erp.crop(tmin=tmin, tmax=tmax).data
+            mean_amp = get_mean_amplitude(erp=roi_erp,
+                                          tmin=tmin,
+                                          tmax=tmax,
+                                          mode=mode)
 
-            if mode == 'pos':
-                sign_mean_data = erp_data_crop[erp_data_crop > 0]
-            elif mode == 'neg':
-                sign_mean_data = erp_data_crop[erp_data_crop < 0]
-            elif mode == 'abs':
-                sign_mean_data = abs(erp_data_crop)
-            else:
-                sign_mean_data = erp_data_crop
-
-            mean_amp = sign_mean_data.mean(axis=0) * 1e6
-
-            fid = Path(erp.comment).name
+            fid = Path(erp.comment.replace("\\", "/")).name
             ch_name = cross_condition_data['ch_name'].values[0]
             erp_measures = erp_measures.append(dict(fid=fid,
                                                     ch_name=ch_name,
@@ -286,20 +301,12 @@ def get_erp_measures_from_cross_condition_data(erp_arrays: List[EvokedArray],
                                                                 mode=mode,
                                                                 return_amplitude=True)
 
-                erp_data_crop = erp.copy().pick(ch_name).crop(tmin=tmin, tmax=tmax).data
+                mean_amp = get_mean_amplitude(erp=erp.copy().pick(ch_name),
+                                              tmin=tmin,
+                                              tmax=tmax,
+                                              mode=mode)
 
-                if mode == 'pos':
-                    sign_mean_data = erp_data_crop[erp_data_crop > 0]
-                elif mode == 'neg':
-                    sign_mean_data = erp_data_crop[erp_data_crop < 0]
-                elif mode == 'abs':
-                    sign_mean_data = abs(erp_data_crop)
-                else:
-                    sign_mean_data = erp_data_crop
-
-                mean_amp = sign_mean_data.mean(axis=0) * 1e6
-
-                fid = Path(erp.comment).name
+                fid = Path(erp.comment.replace("\\", "/")).name
                 erp_measures = erp_measures.append(dict(fid=fid,
                                                         ch_name=ch_name,
                                                         tmin=tmin,

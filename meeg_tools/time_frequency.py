@@ -142,7 +142,8 @@ def get_erp_peak_measures(erp: EvokedArray,
                           tmin: float,
                           tmax: float,
                           mode: str,
-                          picks=None, ) -> pd.DataFrame:
+                          picks=None,
+                          combine='mean') -> pd.DataFrame:
     """
     Computes peak measures (peak latency, peak amplitude) from Evoked instance for a
     given time interval defined by tmin and tmax in seconds. Peak measures can be
@@ -158,6 +159,8 @@ def get_erp_peak_measures(erp: EvokedArray,
     mode: 'pos': finds the peak with a positive voltage (ignores negative voltages)
     'neg': finds the peak with a negative voltage (ignores positive voltages)
     'abs': finds the peak with the largest absolute voltage regardless of sign (positive or negative)
+    combine: whether to combine channels (defined by picks) using 'mean', 'median' or 'std'
+    use None to not combine channels but get peak measures separately for each channel
     picks
 
     Returns
@@ -171,9 +174,9 @@ def get_erp_peak_measures(erp: EvokedArray,
         columns=['fid', 'ch_name', 'tmin', 'tmax', 'mode', 'peak_latency',
                  'peak_amplitude'])
 
-    if picks:
+    if combine:
         picks_idx = pick_channels(erp.info['ch_names'], include=picks)
-        roi_erp = combine_channels(erp, dict(roi=picks_idx), method='mean')
+        roi_erp = combine_channels(erp, dict(roi=picks_idx), method=combine)
         _, lat, amp = roi_erp.get_peak(ch_type='eeg',
                                        tmin=tmin,
                                        tmax=tmax,
@@ -191,7 +194,7 @@ def get_erp_peak_measures(erp: EvokedArray,
                                            ignore_index=True)
 
     else:
-        for ch_name in erp.ch_names:
+        for ch_name in picks:
             _, lat, amp = erp.copy().pick(ch_name).get_peak(ch_type='eeg',
                                                             tmin=tmin,
                                                             tmax=tmax,

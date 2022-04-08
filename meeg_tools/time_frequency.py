@@ -246,9 +246,11 @@ def get_mean_amplitude(erp, tmin, tmax, mode):
     return mean_amplitude
 
 
-def get_erp_measures_from_cross_condition_data(erp_arrays: List[EvokedArray],
-                                               cross_condition_data: pd.DataFrame,
-                                               interval_in_seconds: float):
+def get_erp_measures_from_cross_condition_data(
+    erp_arrays: List[EvokedArray],
+    cross_condition_data: pd.DataFrame,
+    interval_in_seconds: float,
+):
     erp_measures = pd.DataFrame(
         columns=['fid', 'ch_name', 'tmin', 'tmax',
                  'mode', 'peak_latency', 'peak_amplitude', 'mean_amplitude'])

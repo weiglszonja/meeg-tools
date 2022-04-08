@@ -184,7 +184,7 @@ def get_erp_peak_measures(erp: EvokedArray,
     )
 
     if combine:
-        picks_idx = pick_channels(erp.info['ch_names'], include=picks)
+        picks_idx = pick_channels(erp.info["ch_names"], include=picks)
         roi_erp = combine_channels(erp, dict(roi=picks_idx), method=combine)
         _, lat, amp = roi_erp.get_peak(ch_type='eeg',
                                        tmin=tmin,

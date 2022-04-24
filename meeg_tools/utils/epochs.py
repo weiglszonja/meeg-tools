@@ -145,10 +145,11 @@ def create_metadata(epochs: Epochs):
                 ] = (epoch_ind + 1)
 
         metadata.loc[
-            metadata["id"].isin([44, 45, 46, 47, 144, 145, 146, 147]), "answer"
+            metadata["id"].isin([44, 45, 46, 47, 49, 144, 145, 146, 147, 149]), "answer"
         ] = "incorrect"
         metadata.loc[
-            ~metadata["id"].isin([44, 45, 46, 47, 144, 145, 146, 147]), "answer"
+            ~metadata["id"].isin(
+                [44, 45, 46, 47, 49, 144, 145, 146, 147, 149]), "answer"
         ] = "correct"
 
         # find stimuli that are followed by an incorrect answer
@@ -163,6 +164,21 @@ def create_metadata(epochs: Epochs):
         )
         incorrect_answers = stimuli_indices[np.isin(stimuli_indices, incorrect_indices)]
         metadata.loc[incorrect_answers, "answer"] = "incorrect"
+
+        # find arrow directions for stimuli
+        arrow_stimuli = dict(left=[40, 44, 140, 144],
+                             up=[41, 45, 141, 145],
+                             down=[42, 46, 142, 146],
+                             right=[43, 47, 143, 147])
+
+        for arrow in arrow_stimuli:
+            metadata.loc[metadata["id"].isin(arrow_stimuli[arrow]), "arrow"] = arrow
+            stimuli_before_arrow = (
+                    np.asarray(metadata.index[metadata["arrow"] == arrow].tolist()) - 1)
+            arrow_answers = stimuli_indices[np.isin(stimuli_indices,
+                                                    stimuli_before_arrow)]
+
+            metadata.loc[arrow_answers, "arrow"] = arrow
 
     metadata.loc[
         metadata["id"].isin([10, 110, 11, 111, 14, 114, 15, 115]), "triplet"

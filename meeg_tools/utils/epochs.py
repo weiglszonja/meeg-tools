@@ -159,7 +159,7 @@ def create_metadata(epochs: Epochs):
         # find stimuli that are followed by an incorrect answer
         stimuli = metadata[
             metadata["id"].isin(
-                [10, 110, 11, 111, 12, 112, 13, 113, 14, 114, 15, 115, 16, 116]
+                [10, 110, 11, 111, 12, 112, 13, 113, 14, 114, 15, 115, 16, 116, 17, 117, 18, 118, 19, 119, 61, 62]
             )
         ]
         stimuli_indices = np.asarray(stimuli["id"].index.tolist())

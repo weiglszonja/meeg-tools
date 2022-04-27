@@ -140,10 +140,13 @@ def create_metadata(epochs: Epochs):
         logger.info("Found these indices for these epoch boundary events: ")
         logger.info("\n".join("{}\t{}".format(k, v) for k, v in boundaries.items()))
         for epoch_ind, epoch in enumerate(np.split(epochs.events, edges, axis=0)):
-            if epoch_ind != len(edges):
-                metadata.loc[
-                    metadata["time_in_samples"].isin(epoch[..., 0]), "epoch"
-                ] = (epoch_ind + 1)
+            if practice_end_trigger in boundaries:
+                epoch_number = epoch_ind
+            else:
+                epoch_number = epoch_ind + 1
+            metadata.loc[
+                metadata["time_in_samples"].isin(epoch[..., 0]), "epoch"
+            ] = epoch_number
 
         metadata.loc[
             metadata["id"].isin([44, 45, 46, 47, 49, 144, 145, 146, 147, 149]), "answer"

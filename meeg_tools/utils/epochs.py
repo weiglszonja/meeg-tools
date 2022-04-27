@@ -131,7 +131,8 @@ def create_metadata(epochs: Epochs):
         )
 
         # we can add boundaries of epochs
-        epoch_boundaries = [211, 212, 213, 214, 215, 216]
+        epoch_boundaries = [210, 211, 212, 213, 214, 215, 216]
+        practice_end_trigger = epoch_boundaries[0]
 
         edges = np.where(np.isin(epochs.events[..., 2], epoch_boundaries))[0]
 

@@ -155,8 +155,8 @@ def create_metadata(epochs: Epochs):
             "answer",
         ] = "incorrect"
         metadata.loc[
-            ~metadata["id"].isin(
-                [44, 45, 46, 47, 49, 63, 64, 65, 66, 144, 145, 146, 147, 149]
+            metadata["id"].isin(
+                [40, 41, 42, 43, 63, 64, 65, 66, 140, 141, 142, 143]
             ),
             "answer",
         ] = "correct"

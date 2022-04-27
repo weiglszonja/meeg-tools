@@ -149,17 +149,45 @@ def create_metadata(epochs: Epochs):
             ] = epoch_number
 
         metadata.loc[
-            metadata["id"].isin([44, 45, 46, 47, 49, 67, 68, 69, 70, 78, 144, 145, 146, 147, 149]), "answer"
+            metadata["id"].isin(
+                [44, 45, 46, 47, 49, 67, 68, 69, 70, 78, 144, 145, 146, 147, 149]
+            ),
+            "answer",
         ] = "incorrect"
         metadata.loc[
-            ~metadata["id"].isin([44, 45, 46, 47, 49, 63, 64, 65, 66, 144, 145, 146, 147, 149]),
+            ~metadata["id"].isin(
+                [44, 45, 46, 47, 49, 63, 64, 65, 66, 144, 145, 146, 147, 149]
+            ),
             "answer",
         ] = "correct"
 
         # find stimuli that are followed by an incorrect answer
         stimuli = metadata[
             metadata["id"].isin(
-                [10, 110, 11, 111, 12, 112, 13, 113, 14, 114, 15, 115, 16, 116, 17, 117, 18, 118, 19, 119, 61, 62]
+                [
+                    10,
+                    110,
+                    11,
+                    111,
+                    12,
+                    112,
+                    13,
+                    113,
+                    14,
+                    114,
+                    15,
+                    115,
+                    16,
+                    116,
+                    17,
+                    117,
+                    18,
+                    118,
+                    19,
+                    119,
+                    61,
+                    62,
+                ]
             )
         ]
         stimuli_indices = np.asarray(stimuli["id"].index.tolist())
@@ -191,9 +219,7 @@ def create_metadata(epochs: Epochs):
     metadata.loc[
         metadata["id"].isin([10, 11, 14, 15, 112, 113, 114, 115]), "triplet"
     ] = "H"
-    metadata.loc[
-        metadata["id"].isin([12, 13, 16, 110, 111, 116]), "triplet"
-    ] = "L"
+    metadata.loc[metadata["id"].isin([12, 13, 16, 110, 111, 116]), "triplet"] = "L"
     metadata.loc[metadata["id"].isin([19, 119]), "triplet"] = "X"
     metadata.loc[metadata["id"].isin([17, 117]), "triplet"] = "T"
     metadata.loc[metadata["id"].isin([18, 118]), "triplet"] = "R"
@@ -216,9 +242,12 @@ def create_metadata(epochs: Epochs):
         "triplet_type",
     ] = "P"
 
-    metadata.loc[metadata["id"].isin([10, 11, 12, 13, 14, 15, 16, 17, 18, 19]), "sequence"] = "A"
     metadata.loc[
-        metadata["id"].isin([110, 111, 112, 113, 114, 115, 116, 117, 118, 119]), "sequence"
+        metadata["id"].isin([10, 11, 12, 13, 14, 15, 16, 17, 18, 19]), "sequence"
+    ] = "A"
+    metadata.loc[
+        metadata["id"].isin([110, 111, 112, 113, 114, 115, 116, 117, 118, 119]),
+        "sequence",
     ] = "B"
 
     metadata.loc[metadata["id"].isin([11, 13, 15, 111, 113, 115]), "stimuli"] = "P"

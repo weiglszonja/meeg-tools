@@ -149,10 +149,10 @@ def create_metadata(epochs: Epochs):
             ] = epoch_number
 
         metadata.loc[
-            metadata["id"].isin([44, 45, 46, 47, 49, 144, 145, 146, 147, 149]), "answer"
+            metadata["id"].isin([44, 45, 46, 47, 49, 67, 68, 69, 70, 78, 144, 145, 146, 147, 149]), "answer"
         ] = "incorrect"
         metadata.loc[
-            ~metadata["id"].isin([44, 45, 46, 47, 49, 144, 145, 146, 147, 149]),
+            ~metadata["id"].isin([44, 45, 46, 47, 49, 63, 64, 65, 66, 144, 145, 146, 147, 149]),
             "answer",
         ] = "correct"
 
@@ -171,10 +171,10 @@ def create_metadata(epochs: Epochs):
 
         # find arrow directions for stimuli
         arrow_stimuli = dict(
-            left=[40, 44, 140, 144],
-            up=[41, 45, 141, 145],
-            down=[42, 46, 142, 146],
-            right=[43, 47, 143, 147],
+            left=[40, 44, 140, 144, 63, 67],
+            up=[41, 45, 141, 145, 64, 68],
+            down=[42, 46, 142, 146, 65, 69],
+            right=[43, 47, 143, 147, 66, 70],
         )
 
         for arrow in arrow_stimuli:

@@ -197,6 +197,12 @@ def create_metadata(epochs: Epochs):
         incorrect_answers = stimuli_indices[np.isin(stimuli_indices, incorrect_indices)]
         metadata.loc[incorrect_answers, "answer"] = "incorrect"
 
+        correct_indices = (
+            np.asarray(metadata.index[metadata["answer"] == "correct"].tolist()) - 1
+        )
+        correct_answers = stimuli_indices[np.isin(stimuli_indices, correct_indices)]
+        metadata.loc[correct_answers, "answer"] = "correct"
+
         # find arrow directions for stimuli
         arrow_stimuli = dict(
             left=[40, 44, 140, 144, 63, 67],

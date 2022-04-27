@@ -189,23 +189,23 @@ def create_metadata(epochs: Epochs):
             metadata.loc[arrow_answers, "arrow"] = arrow
 
     metadata.loc[
-        metadata["id"].isin([10, 110, 11, 111, 14, 114, 15, 115]), "triplet"
+        metadata["id"].isin([10, 11, 14, 15, 112, 113, 114, 115]), "triplet"
     ] = "H"
     metadata.loc[
-        metadata["id"].isin([12, 112, 13, 113, 16, 116, 112, 113, 116]), "triplet"
+        metadata["id"].isin([12, 13, 16, 110, 111, 116]), "triplet"
     ] = "L"
     metadata.loc[metadata["id"].isin([19, 119]), "triplet"] = "X"
     metadata.loc[metadata["id"].isin([17, 117]), "triplet"] = "T"
     metadata.loc[metadata["id"].isin([18, 118]), "triplet"] = "R"
     metadata.loc[
         metadata["id"].isin(
-            [10, 110, 14, 114],
+            [10, 14, 112, 114],
         ),
         "triplet_type",
     ] = "HR"
     metadata.loc[
         metadata["id"].isin(
-            [12, 112, 16, 116],
+            [12, 16, 110, 116],
         ),
         "triplet_type",
     ] = "LR"

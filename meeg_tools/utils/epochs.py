@@ -224,30 +224,30 @@ def create_metadata(epochs: Epochs):
 
     metadata.loc[
         metadata["id"].isin([10, 11, 14, 15, 112, 113, 114, 115]), "triplet"
-    ] = "H"
-    metadata.loc[metadata["id"].isin([12, 13, 16, 110, 111, 116]), "triplet"] = "L"
+    ] = "high"
+    metadata.loc[metadata["id"].isin([12, 13, 16, 110, 111, 116]), "triplet"] = "low"
     metadata.loc[metadata["id"].isin([19, 119]), "triplet"] = "X"
-    metadata.loc[metadata["id"].isin([17, 117]), "triplet"] = "T"
-    metadata.loc[metadata["id"].isin([18, 118]), "triplet"] = "R"
-    metadata.loc[metadata["id"].isin([61, 62]), "triplet"] = "P"
+    metadata.loc[metadata["id"].isin([17, 117]), "triplet"] = "trill"
+    metadata.loc[metadata["id"].isin([18, 118]), "triplet"] = "repetition"
+    metadata.loc[metadata["id"].isin([61, 62]), "triplet"] = "practice"
     metadata.loc[
         metadata["id"].isin(
             [10, 14, 112, 114],
         ),
         "triplet_type",
-    ] = "HR"
+    ] = "high-random"
     metadata.loc[
         metadata["id"].isin(
             [12, 16, 110, 116],
         ),
         "triplet_type",
-    ] = "LR"
+    ] = "low-random"
     metadata.loc[
         metadata["id"].isin(
             [11, 13, 15, 111, 113, 115],
         ),
         "triplet_type",
-    ] = "P"
+    ] = "pattern"
 
     metadata.loc[
         metadata["id"].isin([10, 11, 12, 13, 14, 15, 16, 17, 18, 19]), "sequence"
@@ -257,19 +257,19 @@ def create_metadata(epochs: Epochs):
         "sequence",
     ] = "B"
 
-    metadata.loc[metadata["id"].isin([11, 13, 15, 111, 113, 115]), "stimuli"] = "P"
+    metadata.loc[metadata["id"].isin([11, 13, 15, 111, 113, 115]), "stimuli"] = "pattern"
 
     metadata.loc[
         metadata["id"].isin([10, 110, 14, 114, 12, 112, 16, 116]), "stimuli"
-    ] = "R"
+    ] = "random"
 
-    metadata.loc[metadata["id"].isin([10, 11, 110, 111]), "rewiring"] = "H-L"
+    metadata.loc[metadata["id"].isin([10, 11, 110, 111]), "rewiring"] = "high-low"
 
-    metadata.loc[metadata["id"].isin([12, 13, 112, 113]), "rewiring"] = "L-H"
+    metadata.loc[metadata["id"].isin([12, 13, 112, 113]), "rewiring"] = "low-high"
 
-    metadata.loc[metadata["id"].isin([14, 15, 114, 115]), "rewiring"] = "H-H"
+    metadata.loc[metadata["id"].isin([14, 15, 114, 115]), "rewiring"] = "high-high"
 
-    metadata.loc[metadata["id"].isin([16, 116]), "rewiring"] = "L-L"
+    metadata.loc[metadata["id"].isin([16, 116]), "rewiring"] = "low-low"
 
     return metadata
 

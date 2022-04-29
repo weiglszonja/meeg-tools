@@ -229,6 +229,7 @@ def create_metadata(epochs: Epochs):
     metadata.loc[metadata["id"].isin([19, 119]), "triplet"] = "X"
     metadata.loc[metadata["id"].isin([17, 117]), "triplet"] = "T"
     metadata.loc[metadata["id"].isin([18, 118]), "triplet"] = "R"
+    metadata.loc[metadata["id"].isin([61, 62]), "triplet"] = "P"
     metadata.loc[
         metadata["id"].isin(
             [10, 14, 112, 114],

@@ -120,12 +120,6 @@ def apply_ica(epochs: Epochs, ica: ICA) -> Epochs:
     ica_epochs.info.update(description=f"n_components: {len(ica.exclude)}")
     ica_epochs.info.update(temp=f'{epochs.info["temp"]}_ICA')
 
-    ica_path = Path(epochs.info["temp"]).parent / "ica"
-    if not ica_path.exists():
-        os.makedirs(ica_path)
-    logger.info(f"Saving ICA solution to {ica_path}")
-    ica.save(os.path.join(ica_path, f'{epochs.info["temp"]}-ica.fif.gz'))
-
     return ica_epochs
 
 

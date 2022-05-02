@@ -2,6 +2,8 @@
 This module contains functions that can be used to clean EEG/MEG data using MNE-Python.
 https://github.com/weiglszonja/meeg-tools/blob/master/README.md
 """
+import os
+from pathlib import Path
 from random import sample
 import numpy as np
 

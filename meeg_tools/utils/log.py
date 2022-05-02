@@ -49,7 +49,7 @@ def update_log(log_file_path: str, epochs: Epochs, notes: str) -> pd.DataFrame:
             "t_min": [epochs.tmin],
             "t_max": [epochs.tmax],
             "n_interpolated": [np.NaN],
-            "n_excluded_components": ica.exclude,
+            "excluded_components": ica.exclude,
             "average_ref_applied": [bool(epochs.info["custom_ref_applied"])],
             "baseline": [epochs.baseline if epochs.baseline else np.NaN],
             "notes": [notes],
